@@ -1,0 +1,380 @@
+powiat boles³awiecki
+powiat dzier¿oniowski
+powiat g³ogowski
+powiat górowski
+powiat jaworski
+powiat jeleniogórski
+powiat kamiennogórski
+powiat k³odzki
+powiat legnicki
+powiat lubañski
+powiat lubiñski
+powiat lwówecki
+powiat milicki
+powiat oleœnicki
+powiat o³awski
+powiat polkowicki
+powiat strzeliñski
+powiat œredzki
+powiat œwidnicki
+powiat trzebnicki
+powiat wa³brzyski
+powiat wo³owski
+powiat wroc³awski
+powiat z¹bkowicki
+powiat zgorzelecki
+powiat z³otoryjski
+Jelenia Góra
+Legnica
+Wa³brzych
+Wroc³aw
+powiat aleksandrowski
+powiat brodnicki
+powiat bydgoski
+powiat che³miñski
+powiat golubsko-dobrzyñski
+powiat grudzi¹dzki
+powiat inowroc³awski
+powiat lipnowski
+powiat mogileñski
+powiat nakielski
+powiat radziejowski
+powiat rypiñski
+powiat sêpoleñski
+powiat œwiecki
+powiat toruñski
+powiat tucholski
+powiat w¹brzeski
+powiat w³oc³awski
+powiat ¿niñski
+Bydgoszcz
+Grudzi¹dz
+Toruñ
+W³oc³awek
+powiat bialski
+powiat bi³gorajski
+powiat che³mski
+powiat hrubieszowski
+powiat janowski
+powiat krasnostawski
+powiat kraœnicki
+powiat lubartowski
+powiat lubelski
+powiat ³êczyñski
+powiat ³ukowski
+powiat opolski
+powiat parczewski
+powiat pu³awski
+powiat radzyñski
+powiat rycki
+powiat œwidnicki
+powiat tomaszowski
+powiat w³odawski
+powiat zamojski
+Bia³a Podlaska
+Che³m
+Lublin
+Zamoœæ
+powiat gorzowski
+powiat kroœnieñski
+powiat miêdzyrzecki
+powiat nowosolski
+powiat s³ubicki
+powiat strzelecko-drezdenecki
+powiat sulêciñski
+powiat œwiebodziñski
+powiat zielonogórski
+powiat ¿agañski
+powiat ¿arski
+powiat wschowski
+Gorzów Wielkopolski
+Zielona Góra
+powiat be³chatowski
+powiat kutnowski
+powiat ³aski
+powiat ³êczycki
+powiat ³owicki
+powiat ³ódzki wschodni
+powiat opoczyñski
+powiat pabianicki
+powiat pajêczañski
+powiat piotrkowski
+powiat poddêbicki
+powiat radomszczañski
+powiat rawski
+powiat sieradzki
+powiat skierniewicki
+powiat tomaszowski
+powiat wieluñski
+powiat wieruszowski
+powiat zduñskowolski
+powiat zgierski
+powiat brzeziñski
+powiat £ódŸ
+Piotrków Trybunalski
+powiat Skierniewice
+powiat bocheñski
+powiat brzeski
+powiat chrzanowski
+powiat d¹browski
+powiat gorlicki
+powiat krakowski
+powiat limanowski
+powiat miechowski
+powiat myœlenicki
+powiat nowos¹decki
+powiat nowotarski
+powiat olkuski
+powiat oœwiêcimski
+powiat proszowicki
+powiat suski
+powiat tarnowski
+powiat tatrzañski
+powiat wadowicki
+powiat wielicki
+Kraków
+Nowy S¹cz
+Tarnów
+powiat bia³obrzeski
+powiat ciechanowski
+powiat garwoliñski
+powiat gostyniñski
+powiat grodziski
+powiat grójecki
+powiat kozienicki
+powiat legionowski
+powiat lipski
+powiat ³osicki
+powiat makowski
+powiat miñski
+powiat m³awski
+powiat nowodworski
+powiat ostro³êcki
+powiat ostrowski
+powiat otwocki
+powiat piaseczyñski
+powiat p³ocki
+powiat p³oñski
+powiat pruszkowski
+powiat przasnyski
+powiat przysuski
+powiat pu³tuski
+powiat radomski
+powiat siedlecki
+powiat sierpiecki
+powiat sochaczewski
+powiat soko³owski
+powiat szyd³owiecki
+powiat warszawski zachodni
+powiat wêgrowski
+powiat wo³omiñski
+powiat wyszkowski
+powiat zwoleñski
+powiat ¿uromiñski
+powiat ¿yrardowski
+Ostro³êka
+P³ock
+Radom
+Siedlce
+Warszawa
+powiat brzeski
+powiat g³ubczycki
+powiat kêdzierzyñsko-kozielski
+powiat kluczborski
+powiat krapkowicki
+powiat namys³owski
+powiat nyski
+powiat oleski
+powiat opolski
+powiat prudnicki
+powiat strzelecki
+Opole
+powiat bieszczadzki
+powiat brzozowski
+powiat dêbicki
+powiat jaros³awski
+powiat jasielski
+powiat kolbuszowski
+powiat kroœnieñski
+powiat le¿ajski
+powiat lubaczowski
+powiat ³añcucki
+powiat mielecki
+powiat ni¿añski
+powiat przemyski
+powiat przeworski
+powiat ropczycko-sêdziszowski
+powiat rzeszowski
+powiat sanocki
+powiat stalowowolski
+powiat strzy¿owski
+powiat tarnobrzeski
+powiat leski
+Krosno
+Przemyœl
+Rzeszów
+Tarnobrzeg
+powiat augustowski
+powiat bia³ostocki
+powiat bielski
+powiat grajewski
+powiat hajnowski
+powiat kolneñski
+powiat ³om¿yñski
+powiat moniecki
+powiat sejneñski
+powiat siemiatycki
+powiat sokólski
+powiat suwalski
+powiat wysokomazowiecki
+powiat zambrowski
+Bia³ystok
+£om¿a
+Suwa³ki
+powiat bytowski
+powiat chojnicki
+powiat cz³uchowski
+powiat gdañski
+powiat kartuski
+powiat koœcierski
+powiat kwidzyñski
+powiat lêborski
+powiat malborski
+powiat nowodworski
+powiat pucki
+powiat s³upski
+powiat starogardzki
+powiat tczewski
+powiat wejherowski
+powiat sztumski
+Gdañsk
+Gdynia
+S³upsk
+Sopot
+powiat bêdziñski
+powiat bielski
+powiat cieszyñski
+powiat czêstochowski
+powiat gliwicki
+powiat k³obucki
+powiat lubliniecki
+powiat miko³owski
+powiat myszkowski
+powiat pszczyñski
+powiat raciborski
+powiat rybnicki
+powiat tarnogóski
+powiat bieruñsko-lêdziñski
+powiat wodzis³awski
+powiat zawierciañski
+powiat ¿ywiecki
+Bielsko-Bia³a
+Bytom
+Chorzów
+Czêstochowa
+D¹browa Górnicza
+Gliwice
+Jastrzêbie-Zdrój
+Jaworzno
+Katowice
+Mys³owice
+Piekary Œl¹skie
+Ruda Œl¹ska
+Rybnik
+Siemianowice Œl¹skie
+Sosnowiec
+Œwiêtoch³owice
+Tychy
+Zabrze
+¯ory
+powiat buski
+powiat jêdrzejowski
+powiat kazimierski
+powiat kielecki
+powiat konecki
+powiat opatowski
+powiat ostrowiecki
+powiat piñczowski
+powiat sandomierski
+powiat skar¿yski
+powiat starachowicki
+powiat staszowski
+powiat w³oszczowski
+powiat Kielce
+powiat bartoszycki
+powiat braniewski
+powiat dzia³dowski
+powiat elbl¹ski
+powiat e³cki
+powiat gi¿ycki
+powiat i³awski
+powiat kêtrzyñski
+powiat lidzbarski
+powiat mr¹gowski
+powiat nidzicki
+powiat nowomiejski
+powiat olecki
+powiat olsztyñski
+powiat ostródzki
+powiat piski
+powiat szczycieñski
+powiat go³dapski
+powiat wêgorzewski
+Elbl¹g
+Olsztyn
+powiat chodzieski
+powiat czarnkowsko-trzcianecki
+powiat gnieŸnieñski
+powiat gostyñski
+powiat grodziski
+powiat jarociñski
+powiat kaliski
+powiat kêpiñski
+powiat kolski
+powiat koniñski
+powiat koœciañski
+powiat krotoszyñski
+powiat leszczyñski
+powiat miêdzychodzki
+powiat nowotomyski
+powiat obornicki
+powiat ostrowski
+powiat ostrzeszowski
+powiat pilski
+powiat pleszewski
+powiat poznañski
+powiat rawicki
+powiat s³upecki
+powiat szamotulski
+powiat œredzki
+powiat œremski
+powiat turecki
+powiat w¹growiecki
+powiat wolsztyñski
+powiat wrzesiñski
+powiat z³otowski
+Kalisz
+Konin
+Leszno
+Poznañ
+powiat bia³ogardzki
+powiat choszczeñski
+powiat drawski
+powiat goleniowski
+powiat gryficki
+powiat gryfiñski
+powiat kamieñski
+powiat ko³obrzeski
+powiat koszaliñski
+powiat myœliborski
+powiat policki
+powiat pryrzycki
+powiat s³awieñski
+powiat stargardzki
+powiat szczecinecki
+powiat œwidwiñski
+powiat wa³ecki
+powiat ³obeski
+Koszalin
+Szczecin
+Œwinoujœcie
