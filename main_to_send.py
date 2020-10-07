@@ -41,7 +41,7 @@ def get_data_for_each_region(file_name: str, folder_name: str) -> None:
     region_list_path: p.Path = p.Path.cwd().joinpath(file_name)
     json_folder_path: p.Path = p.Path.cwd().joinpath(folder_name)
 
-    with region_list_path.open("r") as read_file:
+    with region_list_path.open(mode="r", encoding="utf-8") as read_file:
         for line in read_file:
             json_file_name: str = line.rstrip()
             json_file_path: p.Path = json_folder_path.joinpath(f"{json_file_name}.json")
@@ -195,4 +195,4 @@ def save_file(data_nodes: List[Node], file_name: str, folder_path: p.Path) -> No
 
 
 if __name__ == "__main__":
-    get_data_for_each_region("list_regions.txt", "region_files")
+    get_data_for_each_region("list_regions.txt", "regions_files")
