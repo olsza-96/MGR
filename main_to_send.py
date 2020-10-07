@@ -173,7 +173,7 @@ def search_ways(ways, node_id: int):
 
 
 def save_file(data_nodes: List[Node], file_name: str, folder_path: p.Path) -> None:
-    """ Saves the data of a region nodes to a JSON file
+    """ Saves the data of a region nodes to a new JSON file
 
     Args:
         data_nodes (List[Node]): The list of nodes containing the data
@@ -183,10 +183,15 @@ def save_file(data_nodes: List[Node], file_name: str, folder_path: p.Path) -> No
 
     file_path: p.Path = folder_path.joinpath(f"{file_name}.json")
 
-    with file_path.open("w") as written_file:
-        log.info(f"Saving file {file_name}.json")
+    if not file_path.exists():
+        file_path.touch()
 
-        json.dump(data_nodes, written_file)
+        with file_path.open("w") as written_file:
+            log.info(f"Saving file {file_name}.json")
+
+            json.dump(data_nodes, written_file)
+    else:
+        log.warning(f"File for {file_path.stem} already exists")
 
 
 if __name__ == "__main__":
