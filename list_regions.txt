@@ -1,188 +1,188 @@
-powiat boles³awiecki
-powiat dzier¿oniowski
-powiat g³ogowski
-powiat górowski
+ï»¿powiat bolesÅ‚awiecki
+powiat dzierÅ¼oniowski
+powiat gÅ‚ogowski
+powiat gÃ³rowski
 powiat jaworski
-powiat jeleniogórski
-powiat kamiennogórski
-powiat k³odzki
+powiat jeleniogÃ³rski
+powiat kamiennogÃ³rski
+powiat kÅ‚odzki
 powiat legnicki
-powiat lubañski
-powiat lubiñski
-powiat lwówecki
+powiat lubaÅ„ski
+powiat lubiÅ„ski
+powiat lwÃ³wecki
 powiat milicki
-powiat oleœnicki
-powiat o³awski
+powiat oleÅ›nicki
+powiat oÅ‚awski
 powiat polkowicki
-powiat strzeliñski
-powiat œredzki
-powiat œwidnicki
+powiat strzeliÅ„ski
+powiat Å›redzki
+powiat Å›widnicki
 powiat trzebnicki
-powiat wa³brzyski
-powiat wo³owski
-powiat wroc³awski
-powiat z¹bkowicki
+powiat waÅ‚brzyski
+powiat woÅ‚owski
+powiat wrocÅ‚awski
+powiat zÄ…bkowicki
 powiat zgorzelecki
-powiat z³otoryjski
-Jelenia Góra
+powiat zÅ‚otoryjski
+Jelenia GÃ³ra
 Legnica
-Wa³brzych
-Wroc³aw
+WaÅ‚brzych
+WrocÅ‚aw
 powiat aleksandrowski
 powiat brodnicki
 powiat bydgoski
-powiat che³miñski
-powiat golubsko-dobrzyñski
-powiat grudzi¹dzki
-powiat inowroc³awski
+powiat cheÅ‚miÅ„ski
+powiat golubsko-dobrzyÅ„ski
+powiat grudziÄ…dzki
+powiat inowrocÅ‚awski
 powiat lipnowski
-powiat mogileñski
+powiat mogileÅ„ski
 powiat nakielski
 powiat radziejowski
-powiat rypiñski
-powiat sêpoleñski
-powiat œwiecki
-powiat toruñski
+powiat rypiÅ„ski
+powiat sÄ™poleÅ„ski
+powiat Å›wiecki
+powiat toruÅ„ski
 powiat tucholski
-powiat w¹brzeski
-powiat w³oc³awski
-powiat ¿niñski
+powiat wÄ…brzeski
+powiat wÅ‚ocÅ‚awski
+powiat Å¼niÅ„ski
 Bydgoszcz
-Grudzi¹dz
-Toruñ
-W³oc³awek
+GrudziÄ…dz
+ToruÅ„
+WÅ‚ocÅ‚awek
 powiat bialski
-powiat bi³gorajski
-powiat che³mski
+powiat biÅ‚gorajski
+powiat cheÅ‚mski
 powiat hrubieszowski
 powiat janowski
 powiat krasnostawski
-powiat kraœnicki
+powiat kraÅ›nicki
 powiat lubartowski
 powiat lubelski
-powiat ³êczyñski
-powiat ³ukowski
+powiat Å‚Ä™czyÅ„ski
+powiat Å‚ukowski
 powiat opolski
 powiat parczewski
-powiat pu³awski
-powiat radzyñski
+powiat puÅ‚awski
+powiat radzyÅ„ski
 powiat rycki
-powiat œwidnicki
+powiat Å›widnicki
 powiat tomaszowski
-powiat w³odawski
+powiat wÅ‚odawski
 powiat zamojski
-Bia³a Podlaska
-Che³m
+BiaÅ‚a Podlaska
+CheÅ‚m
 Lublin
-Zamoœæ
+ZamoÅ›Ä‡
 powiat gorzowski
-powiat kroœnieñski
-powiat miêdzyrzecki
+powiat kroÅ›nieÅ„ski
+powiat miÄ™dzyrzecki
 powiat nowosolski
-powiat s³ubicki
+powiat sÅ‚ubicki
 powiat strzelecko-drezdenecki
-powiat sulêciñski
-powiat œwiebodziñski
-powiat zielonogórski
-powiat ¿agañski
-powiat ¿arski
+powiat sulÄ™ciÅ„ski
+powiat Å›wiebodziÅ„ski
+powiat zielonogÃ³rski
+powiat Å¼agaÅ„ski
+powiat Å¼arski
 powiat wschowski
-Gorzów Wielkopolski
-Zielona Góra
-powiat be³chatowski
+GorzÃ³w Wielkopolski
+Zielona GÃ³ra
+powiat beÅ‚chatowski
 powiat kutnowski
-powiat ³aski
-powiat ³êczycki
-powiat ³owicki
-powiat ³ódzki wschodni
-powiat opoczyñski
+powiat Å‚aski
+powiat Å‚Ä™czycki
+powiat Å‚owicki
+powiat Å‚Ã³dzki wschodni
+powiat opoczyÅ„ski
 powiat pabianicki
-powiat pajêczañski
+powiat pajÄ™czaÅ„ski
 powiat piotrkowski
-powiat poddêbicki
-powiat radomszczañski
+powiat poddÄ™bicki
+powiat radomszczaÅ„ski
 powiat rawski
 powiat sieradzki
 powiat skierniewicki
 powiat tomaszowski
-powiat wieluñski
+powiat wieluÅ„ski
 powiat wieruszowski
-powiat zduñskowolski
+powiat zduÅ„skowolski
 powiat zgierski
-powiat brzeziñski
-powiat £ódŸ
-Piotrków Trybunalski
+powiat brzeziÅ„ski
+powiat ÅÃ³dÅº
+PiotrkÃ³w Trybunalski
 powiat Skierniewice
-powiat bocheñski
+powiat bocheÅ„ski
 powiat brzeski
 powiat chrzanowski
-powiat d¹browski
+powiat dÄ…browski
 powiat gorlicki
 powiat krakowski
 powiat limanowski
 powiat miechowski
-powiat myœlenicki
-powiat nowos¹decki
+powiat myÅ›lenicki
+powiat nowosÄ…decki
 powiat nowotarski
 powiat olkuski
-powiat oœwiêcimski
+powiat oÅ›wiÄ™cimski
 powiat proszowicki
 powiat suski
 powiat tarnowski
-powiat tatrzañski
+powiat tatrzaÅ„ski
 powiat wadowicki
 powiat wielicki
-Kraków
-Nowy S¹cz
-Tarnów
-powiat bia³obrzeski
+KrakÃ³w
+Nowy SÄ…cz
+TarnÃ³w
+powiat biaÅ‚obrzeski
 powiat ciechanowski
-powiat garwoliñski
-powiat gostyniñski
+powiat garwoliÅ„ski
+powiat gostyniÅ„ski
 powiat grodziski
-powiat grójecki
+powiat grÃ³jecki
 powiat kozienicki
 powiat legionowski
 powiat lipski
-powiat ³osicki
+powiat Å‚osicki
 powiat makowski
-powiat miñski
-powiat m³awski
+powiat miÅ„ski
+powiat mÅ‚awski
 powiat nowodworski
-powiat ostro³êcki
+powiat ostroÅ‚Ä™cki
 powiat ostrowski
 powiat otwocki
-powiat piaseczyñski
-powiat p³ocki
-powiat p³oñski
+powiat piaseczyÅ„ski
+powiat pÅ‚ocki
+powiat pÅ‚oÅ„ski
 powiat pruszkowski
 powiat przasnyski
 powiat przysuski
-powiat pu³tuski
+powiat puÅ‚tuski
 powiat radomski
 powiat siedlecki
 powiat sierpiecki
 powiat sochaczewski
-powiat soko³owski
-powiat szyd³owiecki
+powiat sokoÅ‚owski
+powiat szydÅ‚owiecki
 powiat warszawski zachodni
-powiat wêgrowski
-powiat wo³omiñski
+powiat wÄ™growski
+powiat woÅ‚omiÅ„ski
 powiat wyszkowski
-powiat zwoleñski
-powiat ¿uromiñski
-powiat ¿yrardowski
-Ostro³êka
-P³ock
+powiat zwoleÅ„ski
+powiat Å¼uromiÅ„ski
+powiat Å¼yrardowski
+OstroÅ‚Ä™ka
+PÅ‚ock
 Radom
 Siedlce
 Warszawa
 powiat brzeski
-powiat g³ubczycki
-powiat kêdzierzyñsko-kozielski
+powiat gÅ‚ubczycki
+powiat kÄ™dzierzyÅ„sko-kozielski
 powiat kluczborski
 powiat krapkowicki
-powiat namys³owski
+powiat namysÅ‚owski
 powiat nyski
 powiat oleski
 powiat opolski
@@ -191,190 +191,190 @@ powiat strzelecki
 Opole
 powiat bieszczadzki
 powiat brzozowski
-powiat dêbicki
-powiat jaros³awski
+powiat dÄ™bicki
+powiat jarosÅ‚awski
 powiat jasielski
 powiat kolbuszowski
-powiat kroœnieñski
-powiat le¿ajski
+powiat kroÅ›nieÅ„ski
+powiat leÅ¼ajski
 powiat lubaczowski
-powiat ³añcucki
+powiat Å‚aÅ„cucki
 powiat mielecki
-powiat ni¿añski
+powiat niÅ¼aÅ„ski
 powiat przemyski
 powiat przeworski
-powiat ropczycko-sêdziszowski
+powiat ropczycko-sÄ™dziszowski
 powiat rzeszowski
 powiat sanocki
 powiat stalowowolski
-powiat strzy¿owski
+powiat strzyÅ¼owski
 powiat tarnobrzeski
 powiat leski
 Krosno
-Przemyœl
-Rzeszów
+PrzemyÅ›l
+RzeszÃ³w
 Tarnobrzeg
 powiat augustowski
-powiat bia³ostocki
+powiat biaÅ‚ostocki
 powiat bielski
 powiat grajewski
 powiat hajnowski
-powiat kolneñski
-powiat ³om¿yñski
+powiat kolneÅ„ski
+powiat Å‚omÅ¼yÅ„ski
 powiat moniecki
-powiat sejneñski
+powiat sejneÅ„ski
 powiat siemiatycki
-powiat sokólski
+powiat sokÃ³lski
 powiat suwalski
 powiat wysokomazowiecki
 powiat zambrowski
-Bia³ystok
-£om¿a
-Suwa³ki
+BiaÅ‚ystok
+ÅomÅ¼a
+SuwaÅ‚ki
 powiat bytowski
 powiat chojnicki
-powiat cz³uchowski
-powiat gdañski
+powiat czÅ‚uchowski
+powiat gdaÅ„ski
 powiat kartuski
-powiat koœcierski
-powiat kwidzyñski
-powiat lêborski
+powiat koÅ›cierski
+powiat kwidzyÅ„ski
+powiat lÄ™borski
 powiat malborski
 powiat nowodworski
 powiat pucki
-powiat s³upski
+powiat sÅ‚upski
 powiat starogardzki
 powiat tczewski
 powiat wejherowski
 powiat sztumski
-Gdañsk
+GdaÅ„sk
 Gdynia
-S³upsk
+SÅ‚upsk
 Sopot
-powiat bêdziñski
+powiat bÄ™dziÅ„ski
 powiat bielski
-powiat cieszyñski
-powiat czêstochowski
+powiat cieszyÅ„ski
+powiat czÄ™stochowski
 powiat gliwicki
-powiat k³obucki
+powiat kÅ‚obucki
 powiat lubliniecki
-powiat miko³owski
+powiat mikoÅ‚owski
 powiat myszkowski
-powiat pszczyñski
+powiat pszczyÅ„ski
 powiat raciborski
 powiat rybnicki
-powiat tarnogóski
-powiat bieruñsko-lêdziñski
-powiat wodzis³awski
-powiat zawierciañski
-powiat ¿ywiecki
-Bielsko-Bia³a
+powiat tarnogÃ³ski
+powiat bieruÅ„sko-lÄ™dziÅ„ski
+powiat wodzisÅ‚awski
+powiat zawierciaÅ„ski
+powiat Å¼ywiecki
+Bielsko-BiaÅ‚a
 Bytom
-Chorzów
-Czêstochowa
-D¹browa Górnicza
+ChorzÃ³w
+CzÄ™stochowa
+DÄ…browa GÃ³rnicza
 Gliwice
-Jastrzêbie-Zdrój
+JastrzÄ™bie-ZdrÃ³j
 Jaworzno
 Katowice
-Mys³owice
-Piekary Œl¹skie
-Ruda Œl¹ska
+MysÅ‚owice
+Piekary ÅšlÄ…skie
+Ruda ÅšlÄ…ska
 Rybnik
-Siemianowice Œl¹skie
+Siemianowice ÅšlÄ…skie
 Sosnowiec
-Œwiêtoch³owice
+ÅšwiÄ™tochÅ‚owice
 Tychy
 Zabrze
-¯ory
+Å»ory
 powiat buski
-powiat jêdrzejowski
+powiat jÄ™drzejowski
 powiat kazimierski
 powiat kielecki
 powiat konecki
 powiat opatowski
 powiat ostrowiecki
-powiat piñczowski
+powiat piÅ„czowski
 powiat sandomierski
-powiat skar¿yski
+powiat skarÅ¼yski
 powiat starachowicki
 powiat staszowski
-powiat w³oszczowski
+powiat wÅ‚oszczowski
 powiat Kielce
 powiat bartoszycki
 powiat braniewski
-powiat dzia³dowski
-powiat elbl¹ski
-powiat e³cki
-powiat gi¿ycki
-powiat i³awski
-powiat kêtrzyñski
+powiat dziaÅ‚dowski
+powiat elblÄ…ski
+powiat eÅ‚cki
+powiat giÅ¼ycki
+powiat iÅ‚awski
+powiat kÄ™trzyÅ„ski
 powiat lidzbarski
-powiat mr¹gowski
+powiat mrÄ…gowski
 powiat nidzicki
 powiat nowomiejski
 powiat olecki
-powiat olsztyñski
-powiat ostródzki
+powiat olsztyÅ„ski
+powiat ostrÃ³dzki
 powiat piski
-powiat szczycieñski
-powiat go³dapski
-powiat wêgorzewski
-Elbl¹g
+powiat szczycieÅ„ski
+powiat goÅ‚dapski
+powiat wÄ™gorzewski
+ElblÄ…g
 Olsztyn
 powiat chodzieski
 powiat czarnkowsko-trzcianecki
-powiat gnieŸnieñski
-powiat gostyñski
+powiat gnieÅºnieÅ„ski
+powiat gostyÅ„ski
 powiat grodziski
-powiat jarociñski
+powiat jarociÅ„ski
 powiat kaliski
-powiat kêpiñski
+powiat kÄ™piÅ„ski
 powiat kolski
-powiat koniñski
-powiat koœciañski
-powiat krotoszyñski
-powiat leszczyñski
-powiat miêdzychodzki
+powiat koniÅ„ski
+powiat koÅ›ciaÅ„ski
+powiat krotoszyÅ„ski
+powiat leszczyÅ„ski
+powiat miÄ™dzychodzki
 powiat nowotomyski
 powiat obornicki
 powiat ostrowski
 powiat ostrzeszowski
 powiat pilski
 powiat pleszewski
-powiat poznañski
+powiat poznaÅ„ski
 powiat rawicki
-powiat s³upecki
+powiat sÅ‚upecki
 powiat szamotulski
-powiat œredzki
-powiat œremski
+powiat Å›redzki
+powiat Å›remski
 powiat turecki
-powiat w¹growiecki
-powiat wolsztyñski
-powiat wrzesiñski
-powiat z³otowski
+powiat wÄ…growiecki
+powiat wolsztyÅ„ski
+powiat wrzesiÅ„ski
+powiat zÅ‚otowski
 Kalisz
 Konin
 Leszno
-Poznañ
-powiat bia³ogardzki
-powiat choszczeñski
+PoznaÅ„
+powiat biaÅ‚ogardzki
+powiat choszczeÅ„ski
 powiat drawski
 powiat goleniowski
 powiat gryficki
-powiat gryfiñski
-powiat kamieñski
-powiat ko³obrzeski
-powiat koszaliñski
-powiat myœliborski
+powiat gryfiÅ„ski
+powiat kamieÅ„ski
+powiat koÅ‚obrzeski
+powiat koszaliÅ„ski
+powiat myÅ›liborski
 powiat policki
 powiat pryrzycki
-powiat s³awieñski
+powiat sÅ‚awieÅ„ski
 powiat stargardzki
 powiat szczecinecki
-powiat œwidwiñski
-powiat wa³ecki
-powiat ³obeski
+powiat Å›widwiÅ„ski
+powiat waÅ‚ecki
+powiat Å‚obeski
 Koszalin
 Szczecin
-Œwinoujœcie
+ÅšwinoujÅ›cie

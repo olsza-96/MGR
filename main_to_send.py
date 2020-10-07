@@ -87,7 +87,7 @@ def get_map_data(url: str, boundary_name: str):
     out meta;
     """
 
-    response: requests.Response = requests.get(url, params={"data":  query_regions})
+    response: requests.Response = requests.get(url, params={"data": query_regions})
 
     return response.json()
 
