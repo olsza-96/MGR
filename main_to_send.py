@@ -11,11 +11,34 @@ log.getLogger().setLevel(log.INFO)
 log.basicConfig(format="%(asctime)s - [%(levelname)s]: %(message)s", datefmt="%H:%M:%S")
 
 
-class Node(TypedDict):
-    """Class definition for Node type hint
+class RawNode(TypedDict):
+    """Class definition for RawNode type hint
 
     Attributes:
-        type (str):
+        id (int):
+        lat (float):
+        lon (float):
+    """
+
+    id: int
+    lat: float
+    lon: float
+
+
+class Way(TypedDict):
+    """Class definition for Way type hint
+    
+    Attributes:
+        id (int):
+        nodes (List[int]):
+        landuse (str):
+    """
+
+
+class RegionNode(TypedDict):
+    """Class definition for RegionNode type hint
+
+    Attributes:
         id (int):
         lat (float):
         lon (float):
@@ -23,12 +46,20 @@ class Node(TypedDict):
         landuse (str):
     """
 
-    type: str
     id: int
     lat: float
     lon: float
     way_id: int
     landuse: str
+
+
+class Region(TypedDict):
+    """Class definition for Region type hint
+
+    Attributes:
+        nodes (List[RegionNode]):
+    """
+    nodes: List[RegionNode]
 
 
 def get_data_for_each_region(file_name: str, folder_name: str) -> None:
@@ -38,7 +69,7 @@ def get_data_for_each_region(file_name: str, folder_name: str) -> None:
     Args:
         file_name (str): The name of the file containing the list of
         regions
-        folder_name (str): The folder where the JSON files are saved
+        folder_name (str): The folder where the JSON files will be saved
     """
 
     region_list_path: p.Path = p.Path.cwd().joinpath(file_name)
@@ -59,6 +90,9 @@ def get_data_for_each_region(file_name: str, folder_name: str) -> None:
 
                 # Remove irrelevant keys from the data
                 raw_data = {k: v for k, v in raw_data.items() if k == "elements"}
+
+
+
                 save_file(raw_data, json_file_name, p.Path.cwd().joinpath('removed_keys'))
 
                 data_nodes: List[Node] = get_nodal_data(raw_data["elements"])
@@ -98,88 +132,46 @@ def get_map_data(url: str, boundary_name: str):
     return response.json()
 
 
-def get_nodal_data(data):
-    """Creates a list of dictionaries being one dictionary the info on one node
-
-    Args:
-        data (?):
-
-    Returns:
-        List[Node]: A list of nodes containing the region data
+def get_region_data(raw_region_data) -> Region:
     """
 
-    nodes = get_list_data(data, "node", ["type", "id", "lat", "lon"])
-    ways = get_list_data(data, "way", ["id", "nodes", "tags"])
-
-    return append_way_data(nodes, ways)
-
-
-def get_list_data(data, key_name: str, attributes: List[str]):
-    """Gets data from a dictionary based on chosen key type (node/way)
-
-    Args:
-        data (?):
-        key_name (str):
-        attributes List[str]:
-
-    Returns:
-        List[str]:
     """
 
-    if key_name in ["node", "way"]:
-        result = []
+    # Tuples to define the keys that are relevant to us
+    node_keys = ("id", "lat", "lon")
+    way_keys = ("id", "nodes", "tags")
 
-        for line in data:
-            if line["type"] == key_name:
-                result.append({k: v for k, v in line.items() if k in attributes})
+    node_list: List[RawNode] = list()
+    way_list: List[Way] = list()
 
-        return result
-    else:
-        log.error(f"Key \"{key_name}\" not supported")
+    for element in [element for element in raw_region_data["elements"]]:
+        if element["type"] == "node":
+            node: RawNode = {k: v for k, v in element.items() if k in node_keys}
+            node_list.append(node)
+        elif element["type"] == "way":
+            way: Way = {k: v for k, v in element.items() if k in way_keys}
+            way["landuse"] = way.pop("tags").pop("landuse")
+            way_list.append(way)
+
+    return {"nodes": get_region_nodes(node_list, way_list)}
 
 
-def append_way_data(nodes, ways) -> List[Node]:
-    """Searches for information regarding nodal membership to ways and updates
-    each node with way_id and landuse type
-
-    Args:
-        nodes (List[str]):
-        ways (List[str]):
-
-    Returns:
-        List[Node]:
+def get_region_nodes(node_list, way_list) -> List[RegionNode]:
     """
 
-    for line in nodes:
-        current_id = line["id"]
-        line.update(search_ways(ways, current_id))
-
-    return nodes
-
-
-def search_ways(ways, node_id: int):
-    """Adds information on way_id and landuse type for each node in the node list
-
-    Args:
-        ways (?):
-        node_id (int):
-
-    Returns:
-        ?:
     """
 
-    result = {}
+    for node in node_list:
+        for way in way_list:
+            if node["id"] in way["nodes"]:
+                node["way_id"] = way["id"]
+                node["landuse"] = way["landuse"]
 
-    for line in ways:
-        if node_id in line["nodes"]:
-            result["way_id"] = line["id"]
-            result["landuse"] = line["tags"]["landuse"]
-
-    return result
+    return node_list
 
 
-def save_file(data_nodes: List[Node], file_name: str, folder_path: p.Path) -> None:
-    """ Saves the data of a region nodes to a new JSON file
+def save_file(data_nodes: List[RegionNode], file_name: str, folder_path: p.Path) -> None:
+    """Saves the data of a region nodes to a new JSON file
 
     Args:
         data_nodes (List[Node]): The list of nodes containing the data
