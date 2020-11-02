@@ -3,6 +3,8 @@ import logging as log
 import json
 import pathlib as p
 from typing import Any, List, TypedDict
+from requests.adapters import HTTPAdapter
+from requests.packages.urllib3.util.retry import Retry
 
 log.getLogger().setLevel(log.INFO)
 log.basicConfig(format="%(asctime)s - [%(levelname)s]: %(message)s", datefmt="%H:%M:%S")
@@ -117,6 +119,17 @@ def get_raw_region_data(url: str, boundary_name: str) -> Any:
     out meta;
     """
 
+    retry_strategy = Retry(
+        total=3,
+        status_forcelist=[429, 500, 502, 503, 504],
+        method_whitelist=["HEAD", "GET", "OPTIONS"]
+    )
+
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    http = requests.Session()
+    http.mount("https://", adapter)
+    http.mount("http://", adapter)
+
     response: requests.Response = requests.get(url, params={"data": query_regions})
 
     return response.json()
@@ -161,7 +174,7 @@ def get_region_nodes(node_list, way_list) -> List[RegionNode]:
 
 
 def save_region_file(region_data: Region, file_name: str, folder_path: p.Path) -> None:
-    """Saves the data of a region nodes to a new JSON file
+    """Saves the data of a region to a new JSON file
 
     Args:
         region_data (Region): A Region object containing the data
