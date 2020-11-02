@@ -33,6 +33,10 @@ class Way(TypedDict):
         landuse (str):
     """
 
+    id: int
+    nodes: List[int]
+    landuse: str
+
 
 class RegionNode(TypedDict):
     """Class definition for RegionNode type hint
