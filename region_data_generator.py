@@ -1,8 +1,9 @@
+import math
 import requests
 import logging as log
 import json
 import pathlib as p
-from typing import Any, List, TypedDict
+from typing import Any, List, TypedDict, Tuple
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
 
@@ -145,36 +146,89 @@ def get_region_data(raw_region_data: Any) -> Region:
     """
 
     # Tuples to define the keys that are relevant to us
-    node_keys = ("id", "lat", "lon")
-    way_keys = ("id", "nodes", "tags")
+    node_relevant_keys: Tuple[str, ...] = ("id", "lat", "lon")
+    way_relevant_keys: Tuple[str, ...] = ("id", "nodes", "tags")
 
-    node_list: List[RawNode] = list()
-    way_list: List[Way] = list()
+    raw_nodes: List[RawNode] = list()
+    ways: List[Way] = list()
 
     for element in [element for element in raw_region_data["elements"]]:
         if element["type"] == "node":
-            node: RawNode = {k: v for k, v in element.items() if k in node_keys}
-            node_list.append(node)
+            node: RawNode = {k: v for k, v in element.items() if k in node_relevant_keys}
+            raw_nodes.append(node)
         elif element["type"] == "way":
-            way: Way = {k: v for k, v in element.items() if k in way_keys}
+            way: Way = {k: v for k, v in element.items() if k in way_relevant_keys}
             way["landuse"] = way.pop("tags").pop("landuse")
-            way_list.append(way)
+            ways.append(way)
 
-    return {"nodes": get_region_nodes(node_list, way_list)}
+    return {"nodes": get_region_nodes(raw_nodes, ways)}
 
 
-def get_region_nodes(node_list, way_list) -> List[RegionNode]:
+def get_region_nodes(raw_nodes: List[RawNode], ways: List[Way]) -> List[RegionNode]:
     """
 
     """
+    # Tuple to define the lands that are not buildable
+    no_buildable_lands: Tuple[str, ...] = ("residential", "nature_reserve")
 
-    for node in node_list:
-        for way in way_list:
+    restricting_nodes: List[RegionNode] = list()
+
+    for node in raw_nodes:
+        for way in ways:
             if node["id"] in way["nodes"]:
                 node["way_id"] = way["id"]
                 node["landuse"] = way["landuse"]
+           
+                if way["landuse"] in no_buildable_lands:
+                    restricting_nodes.append(node)
 
-    return node_list
+    return add_closest_distance_restriction([node for node in raw_nodes if node["landuse"] not in no_buildable_lands], restricting_nodes)
+
+
+def add_closest_distance_restriction(region_nodes: List[RegionNode], restricting_nodes: List[RawNode]):
+    """
+    
+    """
+    min_allowable_distance: float = 1.56
+
+    for node in region_nodes:
+        closest_distance: float = 0
+
+        for restricting_node in restricting_nodes:
+            current_calculated_distance = calculate_distance(node, restricting_node)
+
+            if closest_distance == 0:
+                closest_distance = current_calculated_distance
+
+            if current_calculated_distance < min_allowable_distance:
+                closest_distance = 0
+                break
+            elif (closest_distance > current_calculated_distance):
+                closest_distance = current_calculated_distance
+
+        node["closest_distance_restriction"] = closest_distance
+
+    return [node for node in region_nodes if node["closest_distance_restriction"] != 0]
+
+
+def calculate_distance(node1, node2):
+    """Calculates Haversine distance in kilometers between two nodes
+    :param node1, node2:
+    :return distance:
+    """
+    lat1, lon1 = node1['lat'], node1['lon']
+    lat2, lon2 = node2['lat'], node2['lon']
+    radius = 6371  # km
+
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = (math.sin(dlat / 2) * math.sin(dlat / 2) +
+         math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+         math.sin(dlon / 2) * math.sin(dlon / 2))
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = radius * c
+
+    return distance
 
 
 def save_region_file(region_data: Region, file_name: str, folder_path: p.Path) -> None:
