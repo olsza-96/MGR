@@ -56,7 +56,6 @@ class RegionNode(TypedDict):
     way_id: int
     landuse: str
 
-
 class Region(TypedDict):
     """Class definition for Region type hint
 
@@ -91,15 +90,36 @@ def get_data_for_each_region(file_name: str, folder_name: str) -> None:
             if not json_file_path.exists():
                 log.info(f"Getting data for {json_file_name}")
 
-                raw_region_data = get_raw_region_data("http://overpass-api.de/api/interpreter", json_file_name)
+                neighbour_regions = get_neighbour_data('list_neigbour_regions.txt', json_file_name)
+                raw_region_data = get_raw_region_data("http://overpass-api.de/api/interpreter", json_file_name, "residential|nature_reserve|farmland|meadow|brownfield")
+                for neighbour in neighbour_regions:
+                    raw_neighbours_data = get_raw_region_data("http://overpass-api.de/api/interpreter", neighbour, "residential|nature_reserve")
+                    raw_region_data['elements'] = raw_region_data['elements'] + raw_neighbours_data['elements']
+                log.info(f"Data for {json_file_name} and its neighbour regions downloaded with success")
                 region_data = get_region_data(raw_region_data)
-
                 save_region_file(region_data, json_file_name, json_folder_path)
             else:
                 log.warning(f"File for {json_file_name} already exists")
 
 
-def get_raw_region_data(url: str, boundary_name: str) -> Any:
+def get_neighbour_data(file_name: str, region: str):
+
+    """Gets the information on neighbouring regions for each region"""
+
+    region_neighbours_path: p.Path = p.Path.cwd().joinpath(file_name)
+
+    with region_neighbours_path.open(mode="r", encoding="utf-8") as read_file:
+        for line in read_file:
+            if region + " - " in line:
+                neighbour_raw_line: str = line.rstrip(" \n").replace(f"{region} - ", "").rsplit("; ")
+                neighbours_list = list(filter(None, neighbour_raw_line))
+                neighbours_list = [x.rstrip(";") for x in neighbours_list]
+
+    return neighbours_list
+
+
+
+def get_raw_region_data(url: str, boundary_name: str, landuse_types: str) -> Any:
     """Gets the required data from OpenStreetMap
 
     Args:
@@ -115,7 +135,7 @@ def get_raw_region_data(url: str, boundary_name: str) -> Any:
     area["boundary"="administrative"][admin_level = 6][name = "{boundary_name}"];
     (
        way
-       ["landuse"~"residential|nature_reserve|farmland|meadow|brownfield"]
+       ["landuse"~"residential|{landuse_types}"]
        (area);
        node(w)
        (area);
@@ -142,7 +162,7 @@ def get_raw_region_data(url: str, boundary_name: str) -> Any:
 
 def get_region_data(raw_region_data: Any) -> Region:
     """
-
+    Extracts only relevant data from raw OSM data
     """
 
     # Tuples to define the keys that are relevant to us
@@ -166,7 +186,7 @@ def get_region_data(raw_region_data: Any) -> Region:
 
 def get_region_nodes(raw_nodes: List[RawNode], ways: List[Way]) -> List[RegionNode]:
     """
-
+    Looks for nodes where building wind farm is possibile
     """
     # Tuple to define the lands that are not buildable
     no_buildable_lands: Tuple[str, ...] = ("residential", "nature_reserve")
@@ -187,7 +207,8 @@ def get_region_nodes(raw_nodes: List[RawNode], ways: List[Way]) -> List[RegionNo
 
 def add_closest_distance_restriction(region_nodes: List[RegionNode], restricting_nodes: List[RawNode]):
     """
-    
+    Calculates distances between nodes in sets of valid and restricting nodes.
+    Returns node parameters that is valid for building the wind farm.
     """
     min_allowable_distance: float = 1.56
 
@@ -245,7 +266,7 @@ def save_region_file(region_data: Region, file_name: str, folder_path: p.Path) -
     if not file_path.exists():
         file_path.touch()
 
-        with file_path.open("w") as written_file:
+        with file_path.open(mode = "w", encoding= "utf-8") as written_file:
             log.info(f"Saving file {file_name}.json")
 
             json.dump(region_data, written_file)
