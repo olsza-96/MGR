@@ -110,9 +110,9 @@ powiat wieruszowski
 powiat zduńskowolski
 powiat zgierski
 powiat brzeziński
-powiat Łódź
+Łódź
 Piotrków Trybunalski
-powiat Skierniewice
+Skierniewice
 powiat bocheński
 powiat brzeski
 powiat chrzanowski
@@ -263,7 +263,7 @@ powiat myszkowski
 powiat pszczyński
 powiat raciborski
 powiat rybnicki
-powiat tarnogóski
+powiat tarnogórski
 powiat bieruńsko-lędziński
 powiat wodzisławski
 powiat zawierciański
@@ -368,7 +368,7 @@ powiat kołobrzeski
 powiat koszaliński
 powiat myśliborski
 powiat policki
-powiat pryrzycki
+powiat pyrzycki
 powiat sławieński
 powiat stargardzki
 powiat szczecinecki
