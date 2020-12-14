@@ -1,3 +1,8 @@
 *.json
 list_neigbour_regions.txt
 testing.py
+dashboard_example.py
+Wojewodztwa
+Panstwo
+region_data_files5_12_2020.zip
+colors_plotly.docx
