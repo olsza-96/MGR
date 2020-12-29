@@ -65,7 +65,7 @@ class Region(TypedDict):
     nodes: List[RegionNode]
 
 
-def get_data_for_each_region(file_name: str, folder_name: str) -> None:
+def get_data_for_each_region(file_name: str, folder_name: str, folder_name_restrictions: str) -> None:
     """Gets the data of regions in JSON format and saves them to a folder if
     they don't already exist
 
@@ -77,27 +77,37 @@ def get_data_for_each_region(file_name: str, folder_name: str) -> None:
 
     region_list_path: p.Path = p.Path.cwd().joinpath(file_name)
     json_folder_path: p.Path = p.Path.cwd().joinpath(folder_name)
+    json_folder_path_restrictions: p.Path = p.Path.cwd().joinpath(folder_name_restrictions)
+
+    raw_nodes_landuse: str = "residential|nature_reserve|farmland|meadow|brownfield|construction|orchard|grass|military"
+    raw_neighbours_restriction_landuse: str = "residential|nature_reserve|construction|military"
+
 
     if not json_folder_path.exists():
         json_folder_path.mkdir()
+    if not json_folder_path_restrictions.exists():
+        json_folder_path_restrictions.mkdir()
 
     with region_list_path.open(mode="r", encoding="utf-8") as read_file:
         for line in read_file:
             json_file_name: str = line.rstrip()
             json_file_path: p.Path = json_folder_path.joinpath(f"{json_file_name}.json")
-
+            json_file_name_restrictions: str = json_file_name + "_restricting"
+            json_file_path_restrictions: p.Path = json_folder_path_restrictions.joinpath(f"{json_file_name_restrictions}.json")
             # Check if the JSON file already exists. If it doesn't, get the data and save it
             if not json_file_path.exists():
                 log.info(f"Getting data for {json_file_name}")
 
                 neighbour_regions = get_neighbour_data('list_neigbour_regions.txt', json_file_name)
-                raw_region_data = get_raw_region_data("http://overpass-api.de/api/interpreter", json_file_name, "residential|nature_reserve|farmland|meadow|brownfield")
+                raw_region_data = get_raw_region_data("http://overpass-api.de/api/interpreter", json_file_name, raw_nodes_landuse)
                 for neighbour in neighbour_regions:
-                    raw_neighbours_data = get_raw_region_data("http://overpass-api.de/api/interpreter", neighbour, "residential|nature_reserve")
+                    raw_neighbours_data = get_raw_region_data("http://overpass-api.de/api/interpreter", neighbour, raw_neighbours_restriction_landuse)
                     raw_region_data['elements'] = raw_region_data['elements'] + raw_neighbours_data['elements']
                 log.info(f"Data for {json_file_name} and its neighbour regions downloaded with success")
                 region_data = get_region_data(raw_region_data)
-                save_region_file(region_data, json_file_name, json_folder_path)
+                #save data for available nodes in one file and restricting nodes in another
+                save_region_file(region_data[0], json_file_name, json_folder_path)
+                save_region_file(region_data[1], json_file_name_restrictions, json_folder_path_restrictions)
             else:
                 log.warning(f"File for {json_file_name} already exists")
 
@@ -135,7 +145,7 @@ def get_raw_region_data(url: str, boundary_name: str, landuse_types: str) -> Any
     area["boundary"="administrative"][admin_level = 6][name = "{boundary_name}"];
     (
        way
-       ["landuse"~"residential|{landuse_types}"]
+       ["landuse"~"{landuse_types}"]
        (area);
        node(w)
        (area);
@@ -145,7 +155,7 @@ def get_raw_region_data(url: str, boundary_name: str, landuse_types: str) -> Any
     """
 
     retry_strategy = Retry(
-        total=3,
+        total=10,
         status_forcelist=[429, 500, 502, 503, 504],
         method_whitelist=["HEAD", "GET", "OPTIONS"]
     )
@@ -181,7 +191,8 @@ def get_region_data(raw_region_data: Any) -> Region:
             way["landuse"] = way.pop("tags").pop("landuse")
             ways.append(way)
 
-    return {"nodes": get_region_nodes(raw_nodes, ways)}
+    available_nodes, restricting_nodes = get_region_nodes(raw_nodes, ways)
+    return {"available nodes": available_nodes, "restricting nodes": restricting_nodes}
 
 
 def get_region_nodes(raw_nodes: List[RawNode], ways: List[Way]) -> List[RegionNode]:
@@ -202,7 +213,7 @@ def get_region_nodes(raw_nodes: List[RawNode], ways: List[Way]) -> List[RegionNo
                 if way["landuse"] in no_buildable_lands:
                     restricting_nodes.append(node)
 
-    return add_closest_distance_restriction([node for node in raw_nodes if node["landuse"] not in no_buildable_lands], restricting_nodes)
+    return add_closest_distance_restriction([node for node in raw_nodes if node["landuse"] not in no_buildable_lands], restricting_nodes), restricting_nodes
 
 
 def add_closest_distance_restriction(region_nodes: List[RegionNode], restricting_nodes: List[RawNode]):
@@ -210,7 +221,7 @@ def add_closest_distance_restriction(region_nodes: List[RegionNode], restricting
     Calculates distances between nodes in sets of valid and restricting nodes.
     Returns node parameters that is valid for building the wind farm.
     """
-    min_allowable_distance: float = 1.56
+    min_allowable_distance: float = 0.5 #currently 500 m
 
     for node in region_nodes:
         closest_distance: float = 0
@@ -275,4 +286,4 @@ def save_region_file(region_data: Region, file_name: str, folder_path: p.Path) -
 
 
 if __name__ == "__main__":
-    get_data_for_each_region("list_regions.txt", "region_data_files")
+    get_data_for_each_region("list_regions.txt", "region_data_05km_available", "region_data_05km_restrictions")
