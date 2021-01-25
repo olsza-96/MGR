@@ -1,4 +1,4 @@
-*.json
+/examples
 list_neigbour_regions.txt
 testing.py
 dashboard_example.py

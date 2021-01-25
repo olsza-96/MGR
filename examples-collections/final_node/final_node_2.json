@@ -1,0 +1,11 @@
+{
+  "id": 3830070055,
+  "lat": 52.8904998,
+  "lon": 18.7584969,
+  "region_id": 1,
+  "way_id": 379729636,
+  "landuse": "farmland",
+  "is_buildeable": true,
+  "closest_distance_restriction": 12.23,
+  "restricting_node_id": 3830070055
+}

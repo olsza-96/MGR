@@ -1,0 +1,11 @@
+{
+  "id": 2623407213,
+  "lat": 52.8904998,
+  "lon": 18.7584969,
+  "region_id": 1,
+  "way_id": 379729636,
+  "landuse": "residential",
+  "is_buildeable": false,
+  "closest_distance_restriction": null,
+  "restricting_node_id": null
+}
