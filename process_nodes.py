@@ -46,7 +46,7 @@ def iterate_nodes_list(nodes_allowable: list, nodes_res:list, database):
         time.sleep(1)
         end = time.time()
         log.info(f"Process took {end - start} seconds")
-        break
+
 
 def find_closest_restriction(node_id: int, collection, restricting_nodes: list):
 
@@ -80,7 +80,14 @@ def find_closest_restriction(node_id: int, collection, restricting_nodes: list):
 
 def insert_to_collection(document: dict, collection):
 
-    collection.insert_one(document)
+    cursor_check = collection.find({"id": document["id"]})
+    if cursor_check.count() == 0:
+        log.info("Cursor is empty")
+        collection.insert_one(document)
+    else:
+        log.info(f"The cursor for {document['id']} already exists")
+
+    #collection.insert_one(document)
 
 def calculate_distance(node1, node2):
     """Calculates Haversine distance in kilometers between two nodes
