@@ -55,7 +55,7 @@ def get_data_voivodeship(voivodeship_name: str, voivodeships_dict: dict ):
         #    print(f"Dataframe for {region} is empty")
 
         #if data_voivodeship.empty == False:
-        #    print(f"Lenght of voivodeship data after appending data from {region} is {len(data_voivodeship)}")
+        #    print(f"Length of voivodeship data after appending data from {region} is {len(data_voivodeship)}")
     return  data_voivodeship
 
 
