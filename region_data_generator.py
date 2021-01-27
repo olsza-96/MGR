@@ -1,4 +1,3 @@
-import math
 import requests
 import logging as log
 import json
@@ -137,7 +136,7 @@ def get_raw_region_data(url: str, boundary_name: str, landuse_types: str, try_nu
     """
 
     retry_strategy = Retry(
-        total=10,
+        total=5,
         status_forcelist=[429, 500, 502, 503, 504],
         method_whitelist=["HEAD", "GET", "OPTIONS"]
     )
@@ -146,15 +145,11 @@ def get_raw_region_data(url: str, boundary_name: str, landuse_types: str, try_nu
     http = requests.Session()
     http.mount("https://", adapter)
     http.mount("http://", adapter)
-    try:
-        response: requests.Response = requests.get(url, params={"data": query_regions})
-        log.info(f"The response from the server: {response.status_code}")
-        return response.json()
 
-    except json.decoder.JSONDecodeError:
-        log.info(f"Trying to reconnect in {2 ** try_number + random.random() * 0.01} seconds")
-        time.sleep(2**try_number + random.random() * 0.01)
-        get_raw_region_data(url, boundary_name, landuse_types, try_number + 1)
+    response: requests.Response = requests.get(url, params={"data": query_regions})
+    log.info(f"The response from the server: {response.status_code}")
+    return response.json()
+
 
 
 def get_region_data(raw_region_data: Any, count: int) -> Region:
