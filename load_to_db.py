@@ -23,7 +23,7 @@ def insert_to_collection(host: str, port: int, file:list, collection: str):
         log.info(f"Inserting data to {collection} collection")
         db = connection.Poland_spatial_data
         current_collection = db[collection]
-        current_collection.delete_many({})
+        #current_collection.delete_many({})
         current_collection.insert_many(file)
         log.info(f"Data inserted successfully")
         time.sleep(1)
