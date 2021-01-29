@@ -52,5 +52,28 @@ def connect(host: str, port: int, collection: str):
         end = time.time()
         log.info(f"Process of inserting data took {end - start} seconds")
 
+def delete_elements_col(host: str, port: int, collection: str):
+    start = time.time()
+    log.info(f"Connecting to the database")
+    connection = MongoClient(host, port)
+    try:
+        connection.server_info()
+        log.info(f"Connected successfully")
+    except OperationFailure:
+        log.error(f"Could not connect to db")
+
+    with connection:
+        log.info(f"Connected to {collection}")
+        db = connection.Poland_spatial_data
+        current_collection = db[collection]
+
+        current_collection.remove({})
+
+        time.sleep(1)
+        end = time.time()
+        log.info(f"Process of inserting data took {end - start} seconds")
+
+
 if __name__ == "__main__":
-    connect("localhost", 27017, 'nodes')
+    #connect("localhost", 27017, "nodes")
+    delete_elements_col("localhost", 27017, "nodes_final")
