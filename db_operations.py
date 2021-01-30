@@ -26,7 +26,7 @@ def connect(host: str, port: int, collection: str):
         current_collection = db[collection]
 
         cursor = current_collection.aggregate(pipeline=[{"$group": {
-                                    "_id": {"id": "$id"},
+                                    "_id": {"name": "$name"},
                                     "uniqueIds": {"$addToSet": "$_id"},
                                     "count": {"$sum": 1}
                                     }},
@@ -75,5 +75,5 @@ def delete_elements_col(host: str, port: int, collection: str):
 
 
 if __name__ == "__main__":
-    #connect("localhost", 27017, "nodes")
-    delete_elements_col("localhost", 27017, "nodes_final")
+    connect("localhost", 27017, "regions")
+    #delete_elements_col("localhost", 27017, "regions")
