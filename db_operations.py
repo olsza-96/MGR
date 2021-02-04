@@ -74,6 +74,57 @@ def delete_elements_col(host: str, port: int, collection: str):
         log.info(f"Process of inserting data took {end - start} seconds")
 
 
+def get_nodes_from_way(host: str, port: int):
+    log.info(f"Connecting to the database")
+    connection = MongoClient(host, port)
+    try:
+        connection.server_info()
+        log.info(f"Connected successfully")
+    except OperationFailure:
+        log.error(f"Could not connect to db")
+
+    db = connection.Poland_spatial_data
+    attributes = {"nodes": 1, "landuse": 1, "id":1, "_id": 0}
+    for i in range(1, 381):
+        start = time.time()
+        log.info(f"Getting nodes for region {i}")
+        update_nodes_with_landuse(i, attributes, db)
+        time.sleep(1)
+        end = time.time()
+        log.info(f"Process took {(end - start) / 60} minutes")
+
+
+
+def update_nodes_with_landuse(region_id: int,  attributes: dict, db) -> None:
+    log.info("Getting allowable nodes data from collection")
+    cursor = db["ways"].find({"region_id": region_id}, attributes, allow_disk_use = True)
+    data = list(cursor)
+    if len(data) != 0:
+        for element in data:
+            log.info(f"Way_id: {element['id']}")
+            db["testing_col"].update_many({"id": {"$in": element["nodes"]}},
+                                     {"$set": {"landuse": element["landuse"],
+                                               "way_id": element["id"]}},
+                                     upsert=False
+                                      )
+
+
+
+def insert_to_collection(document: dict, collection):
+
+    #cursor_check = collection.find({"id": document["id"]})
+    #if cursor_check.count() == 0:
+    #    log.info("Cursor is empty")
+    #    collection.insert_one(document)
+    #else:
+    #    log.info(f"The cursor for {document['id']} already exists")
+
+    collection.insert_one(document)
+
+
+
+
 if __name__ == "__main__":
-    connect("localhost", 27017, "regions")
+    get_nodes_from_way("localhost", 27017)
+    #connect("localhost", 27017, "regions")
     #delete_elements_col("localhost", 27017, "regions")
