@@ -1,3 +1,5 @@
+import ssl
+
 from pymongo import MongoClient
 from pymongo.errors import OperationFailure
 import logging as log
@@ -5,11 +7,12 @@ import time
 import pathlib as p
 import os
 import json
+
 log.getLogger().setLevel(log.INFO)
 log.basicConfig(format="%(asctime)s - [%(levelname)s]: %(message)s", datefmt="%H:%M:%S")
 
 
-def connect(host: str, port: int, collection: str):
+def connect(host: str, port: int,  collection: str):
 
     start = time.time()
     log.info(f"Connecting to the database")
@@ -52,10 +55,10 @@ def connect(host: str, port: int, collection: str):
         end = time.time()
         log.info(f"Process of inserting data took {end - start} seconds")
 
-def delete_elements_col(host: str, port: int, collection: str):
+def delete_elements_col(collection: str, list_remove: list):
     start = time.time()
     log.info(f"Connecting to the database")
-    connection = MongoClient(host, port)
+    connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
     try:
         connection.server_info()
         log.info(f"Connected successfully")
@@ -67,16 +70,19 @@ def delete_elements_col(host: str, port: int, collection: str):
         db = connection.Poland_spatial_data
         current_collection = db[collection]
 
-        current_collection.remove({})
+        current_collection.remove({"region_id": {"$in": list_remove}})
 
         time.sleep(1)
         end = time.time()
         log.info(f"Process of inserting data took {end - start} seconds")
 
 
-def get_nodes_from_way(host: str, port: int):
+def get_nodes_from_way():
     log.info(f"Connecting to the database")
-    connection = MongoClient(host, port)
+    connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
+
+    #client = pymongo.MongoClient("mongodb+srv://<username>:<password>@sandbox.iseuv.mongodb.net/<dbname>?retryWrites=true&w=majority")
+
     try:
         connection.server_info()
         log.info(f"Connected successfully")
@@ -85,7 +91,7 @@ def get_nodes_from_way(host: str, port: int):
 
     db = connection.Poland_spatial_data
     attributes = {"nodes": 1, "landuse": 1, "id":1, "_id": 0}
-    for i in range(320, 330):
+    for i in range(200, 201):
         start = time.time()
         log.info(f"Getting nodes for region {i}")
         update_nodes_with_landuse(i, attributes, db)
@@ -122,9 +128,21 @@ def insert_to_collection(document: dict, collection):
     collection.insert_one(document)
 
 
+def read_json_file(f_name: str):
+    with open(f_name) as json_file:
+        data = json.load(json_file)
+
+    region_ranges = [x for x in range(200,301)]
+    output_data = [x for x in data if (x["region_id"] in region_ranges)]
+
+
+    with open("filtered_nodes.json", "w") as json_out:
+        json.dump(output_data, json_out)
 
 
 if __name__ == "__main__":
-    get_nodes_from_way("localhost", 27017)
+    #list_regions = [x for x in range(250,351)]
+    get_nodes_from_way()
     #connect("localhost", 27017, "regions")
-    #delete_elements_col("localhost", 27017, "regions")
+    #delete_elements_col("testing_col",list_regions)
+    #read_json_file("testing_col.json")
