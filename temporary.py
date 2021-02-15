@@ -71,7 +71,7 @@ def delete_elements_col(collection: str, list_remove: list):
         current_collection = db[collection]
 
         current_collection.remove({"region_id": {"$in": list_remove}})
-
+        #current_collection.remove({"region_id": 219, "landuse": {"$exists": "False"}})
         time.sleep(1)
         end = time.time()
         log.info(f"Process of inserting data took {end - start} seconds")
@@ -91,7 +91,7 @@ def get_nodes_from_way():
 
     db = connection.Poland_spatial_data
     attributes = {"nodes": 1, "landuse": 1, "id":1, "_id": 0}
-    for i in range(200, 201):
+    for i in range(185, 190):
         start = time.time()
         log.info(f"Getting nodes for region {i}")
         update_nodes_with_landuse(i, attributes, db)
@@ -108,7 +108,13 @@ def update_nodes_with_landuse(region_id: int,  attributes: dict, db) -> None:
     if len(data) != 0:
         for element in data:
             log.info(f"Way_id: {element['id']}")
-            db["testing_col"].update_many({"id": {"$in": element["nodes"]}},
+            cur = db["testing_col"].find_one({"way_id": element["id"]})
+
+            if cur != None:
+                log.info("Already in db")
+                continue
+            else:
+                db["testing_col"].update_many({"id": {"$in": element["nodes"]}},
                                      {"$set": {"landuse": element["landuse"],
                                                "way_id": element["id"]}},
                                      upsert=False
@@ -132,17 +138,17 @@ def read_json_file(f_name: str):
     with open(f_name) as json_file:
         data = json.load(json_file)
 
-    region_ranges = [x for x in range(200,301)]
+    region_ranges = [x for x in range(180,200)]
     output_data = [x for x in data if (x["region_id"] in region_ranges)]
 
 
-    with open("filtered_nodes.json", "w") as json_out:
+    with open("filtered_nodes_180_200.json", "w") as json_out:
         json.dump(output_data, json_out)
 
 
 if __name__ == "__main__":
-    #list_regions = [x for x in range(250,351)]
+    #list_regions = [150, 175, 181, 182, 183, 184, 185, 186]
     get_nodes_from_way()
     #connect("localhost", 27017, "regions")
-    #delete_elements_col("testing_col",list_regions)
+    #delete_elements_col("ways",list_regions)
     #read_json_file("testing_col.json")
