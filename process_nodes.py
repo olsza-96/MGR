@@ -22,11 +22,11 @@ def get_nodes_from_way(region_id: int):
     db = connection.Poland_spatial_data
     current_collection = db["testing_col"]
     allowable_landuse = ["farmland", "meadow", "brownfield", "orchard", "grass"]
-    attributes = {"coordinates": 1, "id": 1, "_id": 0}
+
     start = time.time()
-    allowable_nodes = query_get_nodes_from_way(allowable_landuse, attributes, current_collection, region_id)
+    allowable_nodes = query_get_nodes_from_way(allowable_landuse, current_collection, region_id)
     restricting_landuse = ["residential", "nature_reserve", "construction", "military"]
-    restricting_nodes = query_get_nodes_from_way(restricting_landuse, attributes, current_collection, region_id)
+    restricting_nodes = query_get_nodes_from_way(restricting_landuse,  current_collection, region_id)
     region_neighbours = get_region_ids(region_id, db["regions"])
     iterate_nodes_list(allowable_nodes, restricting_nodes, current_collection, region_neighbours)
     time.sleep(1)
@@ -62,9 +62,9 @@ def get_restricting_nodes(region_id, landuse_types:list, collection):
 
     return data
 
-def query_get_nodes_from_way(landuse: list, attributes: dict, col, region_id: int):
+def query_get_nodes_from_way(landuse: list,  col, region_id: int):
     log.info(f"Getting allowable nodes data from collection for region {region_id}")
-    cursor = col.find({"landuse": {"$in": landuse}, "region_id": region_id}, attributes, allow_disk_use = True)
+    cursor = col.find({"landuse": {"$in": landuse}, "region_id": region_id}, allow_disk_use = True)
     #returns list of nodes where i can build
     data = list(cursor)
 
