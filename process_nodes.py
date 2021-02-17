@@ -8,7 +8,7 @@ import ssl
 log.getLogger().setLevel(log.INFO)
 log.basicConfig(format="%(asctime)s - [%(levelname)s]: %(message)s", datefmt="%H:%M:%S")
 
-def get_nodes_from_way():
+def get_nodes_from_way(region_id: int):
     log.info(f"Connecting to the database")
 
     connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
@@ -24,7 +24,6 @@ def get_nodes_from_way():
     allowable_landuse = ["farmland", "meadow", "brownfield", "orchard", "grass"]
     attributes = {"coordinates": 1, "id": 1, "_id": 0}
     start = time.time()
-    region_id = 1
     allowable_nodes = query_get_nodes_from_way(allowable_landuse, attributes, current_collection, region_id)
     restricting_landuse = ["residential", "nature_reserve", "construction", "military"]
     restricting_nodes = query_get_nodes_from_way(restricting_landuse, attributes, current_collection, region_id)
@@ -150,4 +149,4 @@ def calculate_distance(node1, node2):
 
 
 if __name__ == "__main__":
-    get_nodes_from_way()
+    get_nodes_from_way(1)
