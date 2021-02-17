@@ -109,7 +109,6 @@ def get_data_for_each_region(file_name: str, folder_name: str) -> None:
                 log.warning(f"File for {json_file_name} already exists")
                 count = count + 1
 
-
 def get_raw_region_data(url: str, boundary_name: str, landuse_types: str, try_number: int) -> Any:
     """Gets the required data from OpenStreetMap
 

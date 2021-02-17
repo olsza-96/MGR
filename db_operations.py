@@ -1,17 +1,27 @@
-from pymongo import MongoClient
-from pymongo.errors import OperationFailure
+from pymongo import MongoClient, DeleteMany
+from pymongo.errors import OperationFailure, BulkWriteError
 import logging as log
 import time
 import pathlib as p
 import os
 import json
 import ssl
+from collections import defaultdict
 
 log.getLogger().setLevel(log.INFO)
 log.basicConfig(format="%(asctime)s - [%(levelname)s]: %(message)s", datefmt="%H:%M:%S")
 
 
-def remove_duplicates():
+from bson import json_util, ObjectId, BSON, objectid
+import json
+
+class JSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        if isinstance(o, ObjectId):
+            return str(o)
+        return json.JSONEncoder.default(self, o)
+
+def return_duplicate_list():
 
     start = time.time()
     log.info(f"Connecting to the database")
@@ -28,34 +38,99 @@ def remove_duplicates():
 
     with connection:
         log.info(f"Connected to collection")
+        cur = collection.find({}, {"id": 1, "_id": 1})
+        data = list(cur)
 
-        cursor = collection.aggregate(pipeline=[{"$group": {
-                                    "_id": {"id": "id"},
-                                    "uniqueIds": {"$addToSet": "$_id"},
-                                    "count": {"$sum": 1}
-                                    }},
-                                    {"$match": {
-                                        "count": {"$gt": 1}
-                                        }
-                                    },
-                                    {"$sort": {
-                                        "count": -1
-                                        }
-                                    }], allowDiskUse = True)
+        items = defaultdict(list)
+        for row in data:
+            items[row['id']].append(row['_id'])  #make a list of 'id' values for each 'id' key
+
+        ids_to_drop = []
+        log.info("Creating list of duplicate items")
+        for key in items.keys():
+            if len(items[key]) > 1:  #if there is more than one 'id'
+                ids_to_drop.append(items[key][1])  #drop the second occurence of id
 
 
-        duplicates = []
-        for element in cursor:
-            log.info(f"{element}")
-            del element["uniqueIds"][0]
-            for id in element["uniqueIds"]:
-                duplicates.append(id)
+        #cur = collection.find({"region_id": 1}, {"_id": 1})
+        #data = list(cur)
+        #data_to_save = [x["_id"] for x in ids_to_drop]
+        test = json_util.dumps(ids_to_drop)
 
-        collection.remove({"_id": {"$in": duplicates}})
+        #Dump loaded BSON to valid JSON string and reload it as dict
+        with open("duplicates.json", "w") as write_file:
+            json.dump(test, write_file)
 
-        time.sleep(1)
-        end = time.time()
-        log.info(f"Process of deleting duplicates data took {end - start} seconds")
+
+        """data = list(cur)
+
+        json.encode(cur, cls=JSONEncoder)
+
+        with open("duplicates.json", "w") as write_file:
+            json.dump(cur, write_file)"""
+
+def remove_duplicates():
+    start = time.time()
+
+    with open("duplicates.txt", "r") as read_file:
+        file = read_file.readlines()
+    file = file[0].replace("[", "").replace("]", "")
+    file_list = file.split(",")
+    file_list = [x.strip(" ").strip('"') for x in file_list]
+
+    #encoded = BSON.encode(file)
+    list_ids = [objectid.ObjectId(x) for x in file_list]
+    log.info(list_ids)
+    a = 1
+    connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
+
+    db = connection.Poland_spatial_data
+    collection = db["testing_col"]
+    log.info("Deleting documents")
+    for element in list_ids:
+        collection.delete_one({'_id': element})
+    """requests = [DeleteMany({'_id': {"$in": list_ids}})]
+    try:
+        collection.bulk_write(requests)
+    except BulkWriteError as bwe:
+        log.info(bwe.details)"""
+
+
+    time.sleep(1)
+    end = time.time()
+    log.info(f"Process of deleting duplicates data took {end - start} seconds")
+
+    """pipeline=[{"$group": {
+            "_id": {"id": "$id"},
+            "uniqueIds": {"$addToSet": "$_id"},
+            "count": {"$sum": 1}
+        }},
+                     {"$match": {
+                         "count": {"$gt": 1}
+                     }
+                     },
+                     {"$sort": {
+                         "count": -1
+                     }
+                     }]"""
+
+
+    """requests = []
+        for document in collection.aggregate(pipeline, allowDiskUse=True):
+            it = iter(document["uniqueIds"])
+            next(it)
+            for id in it:
+                requests.append(DeleteOne({"_id": id}))
+        collection.bulk_write(requests)"""
+    #regions_range = [x for x in range(1, 380)]
+
+
+
+
+
+    #collection.delete_many({"_id": {"$in": [ids_to_drop]}})
+
+
 
 def delete_elements_col(host: str, port: int, collection: str):
     start = time.time()
@@ -134,3 +209,4 @@ if __name__ == "__main__":
     remove_duplicates()
     #connect("localhost", 27017, "regions")
     #delete_elements_col("localhost", 27017, "regions")
+

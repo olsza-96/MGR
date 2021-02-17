@@ -3,14 +3,16 @@ from pymongo.errors import OperationFailure
 import math
 import logging as log
 import time
-
+import ssl
 
 log.getLogger().setLevel(log.INFO)
 log.basicConfig(format="%(asctime)s - [%(levelname)s]: %(message)s", datefmt="%H:%M:%S")
 
-def get_nodes_from_way(host: str, port: int):
+def get_nodes_from_way():
     log.info(f"Connecting to the database")
-    connection = MongoClient(host, port)
+
+    connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
+
     try:
         connection.server_info()
         log.info(f"Connected successfully")
@@ -18,12 +20,16 @@ def get_nodes_from_way(host: str, port: int):
         log.error(f"Could not connect to db")
 
     db = connection.Poland_spatial_data
-    current_collection = db["ways"]
+    current_collection = db["testing_col"]
     allowable_landuse = ["farmland", "meadow", "brownfield", "orchard", "grass"]
-    attributes = {"nodes": 1, "_id": 0}
+    attributes = {"coordinates": 1, "id": 1, "_id": 0}
     start = time.time()
-    allowable_nodes = query_get_nodes_from_way(allowable_landuse, attributes, current_collection)
-    iterate_nodes_list(allowable_nodes, db)
+    region_id = 1
+    allowable_nodes = query_get_nodes_from_way(allowable_landuse, attributes, current_collection, region_id)
+    restricting_landuse = ["residential", "nature_reserve", "construction", "military"]
+    restricting_nodes = query_get_nodes_from_way(restricting_landuse, attributes, current_collection, region_id)
+    region_neighbours = get_region_ids(region_id, db["regions"])
+    iterate_nodes_list(allowable_nodes, restricting_nodes, current_collection, region_neighbours)
     time.sleep(1)
     end = time.time()
     log.info(f"Process took {(end - start) / 60} minutes")
@@ -35,87 +41,74 @@ def get_nodes_from_way(host: str, port: int):
     log.info(f"Process took {(end - start) / 60} minutes")
 
 
-def get_region_ids(node_id: int, database):
-    cursor = database["nodes"].find({"id": node_id}, {"_id": 0, "region_id": 1})
-    region_id = next(cursor, None)["region_id"]
-    cursor_reg = database["regions"].find({"id": region_id}, {"_id": 0, "id": 1, "neighbours": 1})
-    regions_to_extract = []
-    for doc in cursor_reg:
-        regions_to_extract.append(doc["id"])
-        regions_to_extract.extend(doc["neighbours"])
+def get_region_ids(region_id: int , collection):
+    cursor = collection.find({"id": region_id}, {"_id": 0, "neighbours": 1})
 
-    return regions_to_extract
+    result = list(cursor)
+    if len(result)!=0:
+        return result[0]["neighbours"]
+    else:
+        return 0
 
-def get_restricting_nodes(region_id, landuse_types:list, database):
+
+def get_restricting_nodes(region_id, landuse_types:list, collection):
     log.info("Getting restricting nodes data from collection")
     if type(region_id)== int:
-        cursor = database["ways"].find({"landuse": {"$in": landuse_types}, "region_id":  region_id}
-                                    , {"nodes": 1, "_id": 0}, allow_disk_use=True)
+        cursor = collection.find({"landuse": {"$in": landuse_types}, "region_id":  region_id}
+                                              , {"id": 1, "coordinates": 1, "_id": 0}, allow_disk_use=True)
     else:
-        cursor = database["ways"].find({"landuse": {"$in": landuse_types}, "region_id": {"$in": region_id}}
-                                   , {"nodes": 1, "_id": 0}, allow_disk_use=True)
+        cursor = collection.find({"landuse": {"$in": landuse_types}, "region_id": {"$in": region_id}}
+                                   , {"id": 1, "coordinates": 1, "_id": 0}, allow_disk_use=True)
     data = list(cursor)
-    final_list = []
-    for element in data:
-        final_list.extend(element["nodes"])
 
-    # log.info("Data retreived successfully")
-    return final_list
+    return data
 
-def query_get_nodes_from_way(landuse: list, attributes: dict, col):
-    log.info("Getting allowable nodes data from collection")
-    cursor = col.find({"landuse": {"$in": landuse}}, attributes, allow_disk_use = True)
+def query_get_nodes_from_way(landuse: list, attributes: dict, col, region_id: int):
+    log.info(f"Getting allowable nodes data from collection for region {region_id}")
+    cursor = col.find({"landuse": {"$in": landuse}, "region_id": region_id}, attributes, allow_disk_use = True)
+    #returns list of nodes where i can build
     data = list(cursor)
-    final_list = []
-    for element in data:
-        final_list.extend(element["nodes"])
 
-    #log.info("Data retreived successfully")
-    return final_list
+    return data
 
-def iterate_nodes_list(nodes_allowable: list, database):
-    landuse_types = ["residential", "nature_reserve", "construction", "military"]
+def iterate_nodes_list(nodes_allowable: list, restricting_nodes: list, collection, region_neighbours:list):
+
     start = time.time()
+    landuse_types = ["residential", "nature_reserve", "construction", "military"]
     for node in nodes_allowable:
-        region_ids = get_region_ids(node, database)
-        nodes_restricted_base_region = get_restricting_nodes(region_ids[0], landuse_types, database)
-        log.info(f"Looking for closest restriction for node: {node}")
-
-        node_final_region = find_closest_restriction(node, database["nodes"], nodes_restricted_base_region)
+        log.info(f"Looking for restrictions for node: {node['id']}")
+        node_final_region = find_closest_restriction(node, restricting_nodes)
         if node_final_region["is_buildeable"] == True:
-            nodes_restricted_neighbour_region = get_restricting_nodes(region_ids[1:], landuse_types, database)
-            node_final_neighbours = find_closest_restriction(node, database["nodes"], nodes_restricted_neighbour_region)
-            insert_to_collection(node_final_neighbours, database["nodes_final"])
+            nodes_restricted_neighbour_region = get_restricting_nodes(region_neighbours, landuse_types, collection)
+            node_final_neighbours = find_closest_restriction(node, nodes_restricted_neighbour_region)
+            insert_to_collection(node_final_neighbours, collection)
             time.sleep(1)
             end = time.time()
             log.info(f"Finding closes neighbour took {(end -start)/60} minutes")
         else:
-            insert_to_collection(node_final_region, database["nodes_final"])
+            insert_to_collection(node_final_region, collection)
             time.sleep(1)
             end = time.time()
             log.info(f"Finding closes neighbour took {(end - start)/60} minutes")
 
 
-def find_closest_restriction(node_id: int, collection, restricting_nodes: list):
+def find_closest_restriction(node: dict, restricting_nodes: list):
 
-    cursor_current_node = collection.find({"id": node_id}, {"_id": 0, "region_id": 0})
-    node = next(cursor_current_node, None)
     min_allowable_distance: float = 0.5
-    closest_distance: float = 0
+    closest_distance: float =0
 
     final_res_node_id: int = 0
-    for res_node_id in restricting_nodes:
-        restricting_node = next(collection.find({"id": res_node_id}, {"_id": 0, "region_id": 0}), None)
-        current_calculated_distance = calculate_distance(node, restricting_node)
+    for res_node in restricting_nodes:
+        current_calculated_distance = calculate_distance(node["coordinates"], res_node["coordinates"])
         if closest_distance == 0:
             closest_distance = current_calculated_distance
-
+            final_res_node_id = res_node["id"]
         if current_calculated_distance < min_allowable_distance:
             closest_distance = 0
             break
         elif (closest_distance >= current_calculated_distance):
             closest_distance = current_calculated_distance
-            final_res_node_id = res_node_id
+            final_res_node_id = res_node["id"]
     node["closest_distance_restriction"] = closest_distance
     node["restricting_node_id"] = final_res_node_id
     if closest_distance >= min_allowable_distance:
@@ -134,15 +127,15 @@ def insert_to_collection(document: dict, collection):
     #else:
     #    log.info(f"The cursor for {document['id']} already exists")
 
-    collection.insert_one(document)
+    collection.update({"id": document["id"]}, document, upsert= False)
 
 def calculate_distance(node1, node2):
     """Calculates Haversine distance in kilometers between two nodes
     :param node1, node2:
     :return distance:
     """
-    lat1, lon1 = node1['lat'], node1['lon']
-    lat2, lon2 = node2['lat'], node2['lon']
+    lat1, lon1 = node1[1], node1[0]
+    lat2, lon2 = node2[1], node2[0]
     radius = 6371  # km
 
     dlat = math.radians(lat2 - lat1)
@@ -157,4 +150,4 @@ def calculate_distance(node1, node2):
 
 
 if __name__ == "__main__":
-    get_nodes_from_way('localhost', 27017)
+    get_nodes_from_way()
