@@ -23,21 +23,12 @@ def get_nodes_from_way(region_id: int):
     current_collection = db["testing_col"]
     allowable_landuse = ["farmland", "meadow", "brownfield", "orchard", "grass"]
 
-    start = time.time()
     allowable_nodes = query_get_nodes_from_way(allowable_landuse, current_collection, region_id)
     restricting_landuse = ["residential", "nature_reserve", "construction", "military"]
     restricting_nodes = query_get_nodes_from_way(restricting_landuse,  current_collection, region_id)
     region_neighbours = get_region_ids(region_id, db["regions"])
     iterate_nodes_list(allowable_nodes, restricting_nodes, current_collection, region_neighbours)
-    time.sleep(1)
-    end = time.time()
-    log.info(f"Process took {(end - start) / 60} minutes")
 
-    start = time.time()
-    #restricting_nodes = query_get_nodes_from_way(restricted_landue, attributes, current_collection)
-    time.sleep(1)
-    end = time.time()
-    log.info(f"Process took {(end - start) / 60} minutes")
 
 
 def get_region_ids(region_id: int , collection):
@@ -72,24 +63,30 @@ def query_get_nodes_from_way(landuse: list,  col, region_id: int):
 
 def iterate_nodes_list(nodes_allowable: list, restricting_nodes: list, collection, region_neighbours:list):
 
-    start = time.time()
+
     landuse_types = ["residential", "nature_reserve", "construction", "military"]
     for node in nodes_allowable:
+        start = time.time()
         log.info(f"Looking for restrictions for node: {node['id']}")
-        node_final_region = find_closest_restriction(node, restricting_nodes)
-        if node_final_region["is_buildeable"] == True:
-            nodes_restricted_neighbour_region = get_restricting_nodes(region_neighbours, landuse_types, collection)
-            node_final_neighbours = find_closest_restriction(node, nodes_restricted_neighbour_region)
-            insert_to_collection(node_final_neighbours, collection)
-            time.sleep(1)
-            end = time.time()
-            log.info(f"Finding closes neighbour took {(end -start)/60} minutes")
+        #check if node has already the attributes
+        cur = collection.find_one({"id": node["id"], "is_buildeable": {"$exists": True}})
+        if len(list(cur))!=0:
+            log.info(f"Node already calculated")
+            continue
         else:
-            insert_to_collection(node_final_region, collection)
-            time.sleep(1)
-            end = time.time()
-            log.info(f"Finding closes neighbour took {(end - start)/60} minutes")
-
+            node_final_region = find_closest_restriction(node, restricting_nodes)
+            if node_final_region["is_buildeable"] == True:
+                nodes_restricted_neighbour_region = get_restricting_nodes(region_neighbours, landuse_types, collection)
+                node_final_neighbours = find_closest_restriction(node, nodes_restricted_neighbour_region)
+                insert_to_collection(node_final_neighbours, collection)
+                time.sleep(1)
+                end = time.time()
+                log.info(f"Finding closes neighbour took {(end -start)/60} minutes")
+            else:
+                insert_to_collection(node_final_region, collection)
+                time.sleep(1)
+                end = time.time()
+                log.info(f"Finding closes neighbour took {(end - start)/60} minutes")
 
 def find_closest_restriction(node: dict, restricting_nodes: list):
 
