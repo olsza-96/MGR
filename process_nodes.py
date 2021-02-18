@@ -55,7 +55,7 @@ def get_restricting_nodes(region_id, landuse_types:list, collection):
 
 def query_get_nodes_from_way(landuse: list,  col, region_id: int):
     log.info(f"Getting allowable nodes data from collection for region {region_id}")
-    cursor = col.find({"landuse": {"$in": landuse}, "region_id": region_id}, allow_disk_use = True)
+    cursor = col.find({"landuse": {"$in": landuse}, "region_id": region_id}, {"id": 1, "coordinates": 1, "_id": 0}, allow_disk_use = True)
     #returns list of nodes where i can build
     data = list(cursor)
 
@@ -123,7 +123,10 @@ def insert_to_collection(document: dict, collection):
     #else:
     #    log.info(f"The cursor for {document['id']} already exists")
 
-    collection.update({"id": document["id"]}, document, upsert= False)
+    collection.update({"id": document["id"]}, {"$set": {"is_buildeable": document["is_buildeable"],
+                                                        "restricting_node_id": document["restricting_node_id"],
+                                                        "closest_distance_restriction": document["closest_distance_restriction"]}}
+                      , upsert= False)
 
 def calculate_distance(node1, node2):
     """Calculates Haversine distance in kilometers between two nodes
