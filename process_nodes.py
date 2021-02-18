@@ -70,7 +70,7 @@ def iterate_nodes_list(nodes_allowable: list, restricting_nodes: list, collectio
         log.info(f"Looking for restrictions for node: {node['id']}")
         #check if node has already the attributes
         cur = collection.find_one({"id": node["id"], "is_buildeable": {"$exists": True}})
-        if len(list(cur))!=0:
+        if cur!=None:
             log.info(f"Node already calculated")
             continue
         else:
