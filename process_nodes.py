@@ -45,10 +45,10 @@ def get_restricting_nodes(region_id, landuse_types:list, collection):
     log.info("Getting restricting nodes data from collection")
     if type(region_id)== int:
         cursor = collection.find({"landuse": {"$in": landuse_types}, "region_id":  region_id}
-                                              , {"id": 1, "coordinates": 1, "_id": 0}, allow_disk_use=True)
+                                 , {"id": 1, "coordinates": 1, "_id": 0}, allow_disk_use=True)
     else:
         cursor = collection.find({"landuse": {"$in": landuse_types}, "region_id": {"$in": region_id}}
-                                   , {"id": 1, "coordinates": 1, "_id": 0}, allow_disk_use=True)
+                                 , {"id": 1, "coordinates": 1, "_id": 0}, allow_disk_use=True)
     data = list(cursor)
 
     return data
@@ -65,6 +65,7 @@ def iterate_nodes_list(nodes_allowable: list, restricting_nodes: list, collectio
 
 
     landuse_types = ["residential", "nature_reserve", "construction", "military"]
+    nodes_restricted_neighbour_region = get_restricting_nodes(region_neighbours, landuse_types, collection)
     for node in nodes_allowable:
         start = time.time()
         log.info(f"Looking for restrictions for node: {node['id']}")
@@ -74,10 +75,9 @@ def iterate_nodes_list(nodes_allowable: list, restricting_nodes: list, collectio
             log.info(f"Node already calculated")
             continue
         else:
-            node_final_region = find_closest_restriction(node, restricting_nodes)
+            node_final_region = find_closest_restriction(node, restricting_nodes, 'curr_region')
             if node_final_region["is_buildeable"] == True:
-                nodes_restricted_neighbour_region = get_restricting_nodes(region_neighbours, landuse_types, collection)
-                node_final_neighbours = find_closest_restriction(node, nodes_restricted_neighbour_region)
+                node_final_neighbours = find_closest_restriction(node_final_region, nodes_restricted_neighbour_region, 'neighbour_regions')
                 insert_to_collection(node_final_neighbours, collection)
                 time.sleep(1)
                 end = time.time()
@@ -88,45 +88,64 @@ def iterate_nodes_list(nodes_allowable: list, restricting_nodes: list, collectio
                 end = time.time()
                 log.info(f"Finding closes neighbour took {(end - start)/60} minutes")
 
-def find_closest_restriction(node: dict, restricting_nodes: list):
+def find_closest_restriction(node: dict, restricting_nodes: list, mode: str):
 
     min_allowable_distance: float = 0.5
     closest_distance: float =0
 
     final_res_node_id: int = 0
-    for res_node in restricting_nodes:
-        current_calculated_distance = calculate_distance(node["coordinates"], res_node["coordinates"])
-        if closest_distance == 0:
-            closest_distance = current_calculated_distance
-            final_res_node_id = res_node["id"]
-        if current_calculated_distance < min_allowable_distance:
-            closest_distance = 0
-            break
-        elif (closest_distance >= current_calculated_distance):
-            closest_distance = current_calculated_distance
-            final_res_node_id = res_node["id"]
-    node["closest_distance_restriction"] = closest_distance
-    node["restricting_node_id"] = final_res_node_id
-    if closest_distance >= min_allowable_distance:
-        node["is_buildeable"] = True
-    else:
-        node["is_buildeable"] = False
+    #choose subset of restricting nodes where coordinates +- 3 km from the current node
+    restricting_nodes = get_subset_restricting_nodes(node, restricting_nodes)
+    if len(restricting_nodes) == 0:   #no restricting nodes in distance +- 4 km each coordinate
+        if mode == "curr_region":
+            node["is_buildeable"] = True
+            node["closest_distance_restriction"] = 4.
+            node["restricting_node_id"] = 999999999999
+        else:
+            return node
 
-    return node
+    else:
+        for res_node in restricting_nodes:
+            current_calculated_distance = calculate_distance(node["coordinates"], res_node["coordinates"])
+            if closest_distance == 0:
+                closest_distance = current_calculated_distance
+                final_res_node_id = res_node["id"]
+            if current_calculated_distance < min_allowable_distance:
+                closest_distance = 0
+                break
+            elif (closest_distance >= current_calculated_distance):
+                closest_distance = current_calculated_distance
+                final_res_node_id = res_node["id"]
+        node["closest_distance_restriction"] = closest_distance
+        node["restricting_node_id"] = final_res_node_id
+        if closest_distance >= min_allowable_distance:
+            node["is_buildeable"] = True
+        else:
+            node["is_buildeable"] = False
+
+        return node
+
+def get_subset_restricting_nodes(current_node: dict, restricting_nodes:list):
+
+    limit_coordinates = 0.04 #in coordinate system this would be around 3.33 km
+
+    limit_lon = [current_node["coordinates"][0]- limit_coordinates, current_node["coordinates"][0]+limit_coordinates]
+    limit_lat = [current_node["coordinates"][1]- limit_coordinates, current_node["coordinates"][1]+limit_coordinates]
+
+    restricting_filtered = list(filter(lambda  d: d["coordinates"][0]>= limit_lon[0] and
+                                                  d["coordinates"][0]<= limit_lon[1] and d["coordinates"][1]>=limit_lat[0]
+                                                  and d["coordinates"][1]<=limit_lat[1], restricting_nodes))
+
+    return restricting_filtered
+
 
 def insert_to_collection(document: dict, collection):
 
-    #cursor_check = collection.find({"id": document["id"]})
-    #if cursor_check.count() == 0:
-    #    log.info("Cursor is empty")
-    #    collection.insert_one(document)
-    #else:
-    #    log.info(f"The cursor for {document['id']} already exists")
 
-    collection.update({"id": document["id"]}, {"$set": {"is_buildeable": document["is_buildeable"],
-                                                        "restricting_node_id": document["restricting_node_id"],
-                                                        "closest_distance_restriction": document["closest_distance_restriction"]}}
-                      , upsert= False)
+    collection.update_one({"id": document["id"]}, {"$set": {"is_buildeable": document["is_buildeable"],
+                                                            "restricting_node_id": document["restricting_node_id"],
+                                                            "closest_distance_restriction": document["closest_distance_restriction"]}}
+                          , upsert= False)
 
 def calculate_distance(node1, node2):
     """Calculates Haversine distance in kilometers between two nodes
@@ -149,4 +168,5 @@ def calculate_distance(node1, node2):
 
 
 if __name__ == "__main__":
+    #for i in range(45,47):
     get_nodes_from_way(1)

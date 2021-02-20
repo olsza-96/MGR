@@ -1,87 +1,16 @@
-import ssl
-
-from pymongo import MongoClient, DeleteMany, UpdateOne
-from pymongo.errors import OperationFailure, BulkWriteError
+from pymongo import MongoClient
+from pymongo.errors import OperationFailure
+import math
 import logging as log
 import time
-import pathlib as p
-import os
-import json
-from bson import objectid, BSON
+import ssl
 
 log.getLogger().setLevel(log.INFO)
 log.basicConfig(format="%(asctime)s - [%(levelname)s]: %(message)s", datefmt="%H:%M:%S")
 
-
-def delete_duplicates(collection: str):
-
-    start = time.time()
+def get_nodes_from_way(region_id: int):
     log.info(f"Connecting to the database")
-    connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
 
-    try:
-        connection.server_info()
-        log.info(f"Connected successfully")
-    except OperationFailure:
-        log.error(f"Could not connect to db")
-
-    with connection:
-        log.info(f"Connected to {collection}")
-        db = connection.Poland_spatial_data
-        current_collection = db[collection]
-
-        cursor = current_collection.aggregate(pipeline=[{"$group": {
-                                    "_id": {"name": "$name"},
-                                    "uniqueIds": {"$addToSet": "$_id"},
-                                    "count": {"$sum": 1}
-                                    }},
-                                    {"$match": {
-                                        "count": {"$gt": 1}
-                                        }
-                                    },
-                                    {"$sort": {
-                                        "count": -1
-                                        }
-                                    }], allowDiskUse = True)
-
-        duplicates = []
-        for element in cursor:
-            log.info(f"{element}")
-            del element["uniqueIds"][0]
-            for id in element["uniqueIds"]:
-                duplicates.append(id)
-
-        current_collection.remove({"_id": {"$in": duplicates}})
-
-        time.sleep(1)
-        end = time.time()
-        log.info(f"Process of inserting data took {end - start} seconds")
-
-def delete_elements_col(collection: str, list_remove: list):
-    start = time.time()
-    log.info(f"Connecting to the database")
-    connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
-
-    try:
-        connection.server_info()
-        log.info(f"Connected successfully")
-    except OperationFailure:
-        log.error(f"Could not connect to db")
-
-    with connection:
-        log.info(f"Connected to {collection}")
-        db = connection.Poland_spatial_data
-        current_collection = db[collection]
-
-        current_collection.remove({"region_id": {"$in": list_remove}})
-        #current_collection.remove({"region_id": 219, "landuse": {"$exists": "False"}})
-        time.sleep(1)
-        end = time.time()
-        log.info(f"Process of inserting data took {end - start} seconds")
-
-
-def get_nodes_from_way():
-    log.info(f"Connecting to the database")
     connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
 
     try:
@@ -91,178 +20,153 @@ def get_nodes_from_way():
         log.error(f"Could not connect to db")
 
     db = connection.Poland_spatial_data
-    cur = db["testing_col"].find({})
-    print(f"No of documents in testing col: {len(list(cur))}")
-    attributes = {"nodes": 1, "landuse": 1, "id":1, "_id": 0}
-    for i in range(185, 190):
-        start = time.time()
-        log.info(f"Getting nodes for region {i}")
-        update_nodes_with_landuse(i, attributes, db)
-        time.sleep(1)
-        end = time.time()
-        log.info(f"Process took {(end - start) / 60} minutes")
+    current_collection = db["testing_col"]
+    allowable_landuse = ["farmland", "meadow", "brownfield", "orchard", "grass"]
+
+    allowable_nodes = query_get_nodes_from_way(allowable_landuse, current_collection, region_id)
+    restricting_landuse = ["residential", "nature_reserve", "construction", "military"]
+    restricting_nodes = query_get_nodes_from_way(restricting_landuse,  current_collection, region_id)
+    region_neighbours = get_region_ids(region_id, db["regions"])
+    iterate_nodes_list(allowable_nodes, restricting_nodes, current_collection, region_neighbours)
 
 
 
-def update_nodes_with_landuse(region_id: int,  attributes: dict, db) -> None:
-    log.info("Getting allowable nodes data from collection")
-    cursor = db["ways"].find({"region_id": region_id}, attributes, allow_disk_use = True)
+def get_region_ids(region_id: int , collection):
+    cursor = collection.find({"id": region_id}, {"_id": 0, "neighbours": 1})
+
+    result = list(cursor)
+    if len(result)!=0:
+        return result[0]["neighbours"]
+    else:
+        return 0
+
+
+def get_restricting_nodes(region_id, landuse_types:list, collection):
+    log.info("Getting restricting nodes data from collection")
+    if type(region_id)== int:
+        cursor = collection.find({"landuse": {"$in": landuse_types}, "region_id":  region_id}
+                                 , {"id": 1, "coordinates": 1, "_id": 0}, allow_disk_use=True)
+    else:
+        cursor = collection.find({"landuse": {"$in": landuse_types}, "region_id": {"$in": region_id}}
+                                 , {"id": 1, "coordinates": 1, "_id": 0}, allow_disk_use=True)
     data = list(cursor)
-    if len(data) != 0:
-        for element in data:
-            log.info(f"Way_id: {element['id']}")
-            cur = db["testing_col"].find_one({"way_id": element["id"]})
 
-            if cur != None:
-                log.info("Already in db")
-                continue
-            else:
-                db["testing_col"].update_many({"id": {"$in": element["nodes"]}},
-                                     {"$set": {"landuse": element["landuse"],
-                                               "way_id": element["id"]}},
-                                     upsert=False
-                                      )
+    return data
+
+def query_get_nodes_from_way(landuse: list,  col, region_id: int):
+    log.info(f"Getting allowable nodes data from collection for region {region_id}")
+    cursor = col.find({"landuse": {"$in": landuse}, "region_id": region_id}, {"id": 1, "coordinates": 1, "_id": 0}, allow_disk_use = True)
+    #returns list of nodes where i can build
+    data = list(cursor)
+
+    return data
+
+def iterate_nodes_list(nodes_allowable: list, restricting_nodes: list, collection, region_neighbours:list):
 
 
-def update_from_file(file):
-    connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
-
-    with connection:
-        log.info(f"Inserting data to collection")
-        db = connection.Poland_spatial_data
-        current_collection = db["testing_col"]
-
-        for element in file:
-            log.info(f"Node_id: {element['id']}")
-            current_collection.update({"id": element["id"]},
-                                      {"$set": {"landuse": element["landuse"],
-                                                "way_id": element["way_id"]}},
-                                      upsert=False
-                                      )
-
-def insert_to_collection(documents: list):
-    connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
-
-    db = connection.Poland_spatial_data
-    collection = db["ways"]
-    for document in documents:
-        cursor_check = collection.find({"id": document["id"]})
-        if cursor_check.count() == 0:
-            log.info("Inserting document")
-            collection.insert_one(document)
+    landuse_types = ["residential", "nature_reserve", "construction", "military"]
+    nodes_restricted_neighbour_region = get_restricting_nodes(region_neighbours, landuse_types, collection)
+    for node in nodes_allowable:
+        start = time.time()
+        log.info(f"Looking for restrictions for node: {node['id']}")
+        #check if node has already the attributes
+        cur = collection.find_one({"id": node["id"], "is_buildeable": {"$exists": True}})
+        if cur!=None:
+            log.info(f"Node already calculated")
+            continue
         else:
-            log.info(f"The cursor for {document['id']} already exists")
-
-        collection.insert(document)
-
-
-def read_json_file(f_name: str):
-    with open(f_name) as json_file:
-        data = json.load(json_file)
-
-    #region_ranges = [x for x in range(180,200)]
-    #output_data = [x for x in data if (x["region_id"] in region_ranges)]
-
-    output_data = [x for x in data if ("landuse" in x.keys())]
-    output_data = [{k: v for k,v in d.items() if k!="_id"} for d in output_data]
-
-    print(f"Length {len(output_data)}")
-
-    #with open("filtered_nodes_180_200.json", "w") as json_out:
-    #    json.dump(output_data, json_out)
-
-    return output_data
-
-def insert_to_db(file):
-    with open(file) as json_file:
-        data = json.load(json_file)
-
-    connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
-    try:
-        connection.server_info()
-        log.info(f"Connected successfully")
-    except OperationFailure:
-        log.error(f"Could not connect to db")
-
-    with connection:
-        log.info(f"Connected to collection")
-        db = connection.Poland_spatial_data
-        current_collection = db["regions"]
-        for i in range(1, 381):
-            log.info(f"Inserting data for region {i}")
-            data_region = [x for x in data if (x["id"] ==i)]
-            data_region = [{k: v for k,v in d.items() if k!="_id"} for d in data_region]
-            if len(data_region) != 0:
-                current_collection.insert_many(data_region, ordered=False)
+            node_final_region = find_closest_restriction(node, restricting_nodes, 'curr_region')
+            if node_final_region["is_buildeable"] == True:
+                node_final_neighbours = find_closest_restriction(node_final_region, nodes_restricted_neighbour_region, 'neighbour_regions')
+                insert_to_collection(node_final_neighbours, collection)
+                time.sleep(1)
+                end = time.time()
+                log.info(f"Finding closes neighbour took {(end -start)/60} minutes")
             else:
-                continue
-        #save_file(data_region, i)
-        #data_region = [{k: v for k,v in d.items() if k!= "_id"} for d in data_region]
+                insert_to_collection(node_final_region, collection)
+                time.sleep(1)
+                end = time.time()
+                log.info(f"Finding closes neighbour took {(end - start)/60} minutes")
 
-    #insert_to_collection(data_region)
-    #output_data = [x for x in data if (x["region_id"] in region_ranges)]
+def find_closest_restriction(node: dict, restricting_nodes: list, mode: str):
 
-def save_file(data:list, i:int):
-    folder_path: p.Path = p.Path.cwd().joinpath("json_files")
-    file_path: p.Path = folder_path.joinpath(f"input_nodes_region_{i}_{i+9}.json")
-    with file_path.open(mode="w", encoding="utf-8") as written_file:
-        log.info(f"Saving file input_nodes_region_{i}_{i+9}.json")
-        json.dump(data, written_file)
+    min_allowable_distance: float = 0.5
+    closest_distance: float =0
 
-def remove_duplicates():
-    with open("/Users/Olga/PycharmProjects/MGR_Project/MGR/duplicates.txt", "r") as read_file:
-        file = read_file.readlines()
-    file = file[0].replace("[", "").replace("]", "")
-    file_list = file.split(",")
-    file_list = [x.strip(" ").strip('"') for x in file_list]
+    final_res_node_id: int = 0
+    #choose subset of restricting nodes where coordinates +- 3 km from the current node
+    restricting_nodes = get_subset_restricting_nodes(node, restricting_nodes)
+    if len(restricting_nodes) == 0:   #no restricting nodes in distance +- 4 km each coordinate
+        if mode == "curr_region":
+            node["is_buildeable"] = True
+            node["closest_distance_restriction"] = 4.
+            node["restricting_node_id"] = 999999999999
+        else:
+            return node
 
-    #encoded = BSON.encode(file)
-    list_ids = [objectid.ObjectId(x) for x in file_list]
+    else:
+        for res_node in restricting_nodes:
+            current_calculated_distance = calculate_distance(node["coordinates"], res_node["coordinates"])
+            if closest_distance == 0:
+                closest_distance = current_calculated_distance
+                final_res_node_id = res_node["id"]
+            if current_calculated_distance < min_allowable_distance:
+                closest_distance = 0
+                break
+            elif (closest_distance >= current_calculated_distance):
+                closest_distance = current_calculated_distance
+                final_res_node_id = res_node["id"]
+        node["closest_distance_restriction"] = closest_distance
+        node["restricting_node_id"] = final_res_node_id
+        if closest_distance >= min_allowable_distance:
+            node["is_buildeable"] = True
+        else:
+            node["is_buildeable"] = False
 
-    log.info(len(list_ids))
+        return node
 
-    connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
+def get_subset_restricting_nodes(current_node: dict, restricting_nodes:list):
 
-    db = connection.Poland_spatial_data
-    collection = db["testing_col"]
-    log.info("Deleting documents")
-    for x in range(0,len(list_ids), 10000):
-        log.info(f"{x} {x+10000}")
-        to_delete = list_ids[x:x+10000]
-        requests = [DeleteMany({"_id": {"$in": to_delete}})]
-        try:
-            collection.bulk_write(requests)
-        except BulkWriteError as bwe:
-            log.info(bwe.details)
+    limit_coordinates = 0.04 #in coordinate system this would be around 3.33 km
+
+    limit_lon = [current_node["coordinates"][0]- limit_coordinates, current_node["coordinates"][0]+limit_coordinates]
+    limit_lat = [current_node["coordinates"][1]- limit_coordinates, current_node["coordinates"][1]+limit_coordinates]
+
+    restricting_filtered = list(filter(lambda  d: d["coordinates"][0]>= limit_lon[0] and
+                                                  d["coordinates"][0]<= limit_lon[1] and d["coordinates"][1]>=limit_lat[0]
+                                                  and d["coordinates"][1]<=limit_lat[1], restricting_nodes))
+
+    return restricting_filtered
 
 
-def bulk_update_collection(file: list):
-    connection = MongoClient("mongodb+srv://olga:MGR12345%21@sandbox.iseuv.mongodb.net/Poland_spatial_data?retryWrites=true&w=majority", authSource = "admin",  ssl_cert_reqs=ssl.CERT_NONE)
+def insert_to_collection(document: dict, collection):
 
-    db = connection.Poland_spatial_data
-    collection = db["testing_col"]
-    log.info("Updating documents")
-    for x in range(0,len(file), 10000):
-        log.info(f"{x} {x+10000}")
-        to_update = file[x:x+10000]
-        requests = [UpdateOne({"id": to_update[i]["id"]},
-                              {"$set": {"landuse": to_update[i]["landuse"], "way_id": to_update[i]["way_id"]}})
-                    for i in range(len(to_update))]
-        try:
-            log.info(file[x]["id"])
-            collection.bulk_write(requests)
-        except BulkWriteError as bwe:
-            log.info(bwe.details)
+
+    collection.update_one({"id": document["id"]}, {"$set": {"is_buildeable": document["is_buildeable"],
+                                                            "restricting_node_id": document["restricting_node_id"],
+                                                            "closest_distance_restriction": document["closest_distance_restriction"]}}
+                          , upsert= False)
+
+def calculate_distance(node1, node2):
+    """Calculates Haversine distance in kilometers between two nodes
+    :param node1, node2:
+    :return distance:
+    """
+    lat1, lon1 = node1[1], node1[0]
+    lat2, lon2 = node2[1], node2[0]
+    radius = 6371  # km
+
+    dlat = math.radians(lat2 - lat1)
+    dlon = math.radians(lon2 - lon1)
+    a = (math.sin(dlat / 2) * math.sin(dlat / 2) +
+         math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) *
+         math.sin(dlon / 2) * math.sin(dlon / 2))
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    distance = radius * c
+
+    return distance
+
 
 if __name__ == "__main__":
-    #list_regions = [150, 175, 181, 182, 183, 184, 185, 186]
-    #get_nodes_from_way()
-
-    #delete_elements_col("ways",list_regions)
-    #out_nodes = read_json_file("json_files/output_nodes_200_250(no_219).json")
-    #update_from_file(out_nodes)
-    #insert_to_db("json_files/regions_backup.json")
-    #delete_duplicates("ways")
-    #remove_duplicates()
-    file = read_json_file("/Users/Olga/PycharmProjects/MGR_Project/MGR/json_files/out_small_coll.json")
-    bulk_update_collection(file)
+    for i in range(45,47):
+        get_nodes_from_way(i)
