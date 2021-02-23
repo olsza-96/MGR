@@ -102,7 +102,7 @@ def find_closest_restriction(node: dict, restricting_nodes: list, mode: str):
             node["closest_distance_restriction"] = 4.
             node["restricting_node_id"] = 999999999999
         else:
-            return node
+            pass
 
     else:
         for res_node in restricting_nodes:
@@ -123,7 +123,8 @@ def find_closest_restriction(node: dict, restricting_nodes: list, mode: str):
         else:
             node["is_buildeable"] = False
 
-        return node
+
+    return node
 
 def get_subset_restricting_nodes(current_node: dict, restricting_nodes:list):
 

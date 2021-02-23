@@ -128,7 +128,7 @@ def find_closest_restriction(node: dict, restricting_nodes: list, mode: str):
 
 def get_subset_restricting_nodes(current_node: dict, restricting_nodes:list):
 
-    limit_coordinates = 0.04 #in coordinate system this would be around 3.33 km
+    limit_coordinates = 0.04 #in coordinate system this would be around 4.44 km
 
     limit_lon = [current_node["coordinates"][0]- limit_coordinates, current_node["coordinates"][0]+limit_coordinates]
     limit_lat = [current_node["coordinates"][1]- limit_coordinates, current_node["coordinates"][1]+limit_coordinates]
@@ -170,4 +170,4 @@ def calculate_distance(node1, node2):
 
 if __name__ == "__main__":
     #for i in range(45,47):
-    get_nodes_from_way(1)
+    get_nodes_from_way(140)
