@@ -26,7 +26,6 @@ def get_buildable_nodes(region_id: int):
     current_collection = db["testing_col"]
     #delete some field from document
     #db["regions"].update_one({}, {"$unset": {"results_500": 1}})
-    #db.example.updateMany({},{"$unset":{"tags.words":1}})
 
     query = [
         {
