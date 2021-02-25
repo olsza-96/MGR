@@ -74,7 +74,7 @@ def get_buildable_nodes(region_id: int):
         pass
 
 def process_nodes_for_distance(region_id: int, min_distance: float, allowable_nodes: list, db):
-    filtered_ways = filter_data_distance(allowable_nodes, 2.5)
+    filtered_ways = filter_data_distance(allowable_nodes, min_distance)
     overall_buildeable_area, overall_allowable_power, node_number = iterate_allowable_ways(filtered_ways)
     update_collection(db, region_id, overall_buildeable_area, overall_allowable_power, node_number, min_distance)
 
