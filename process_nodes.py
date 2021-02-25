@@ -170,4 +170,4 @@ def calculate_distance(node1, node2):
 
 if __name__ == "__main__":
     #for i in range(45,47):
-    get_nodes_from_way(140)
+    get_nodes_from_way(214)
