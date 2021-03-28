@@ -103,11 +103,11 @@ def iterate_allowable_ways(allowable_nodes: list, min_allowable_power: int):
     if type(allowable_nodes)!= int:
         for way in allowable_nodes:
             log.info(f"Calculating for way: {way['_id']}")
-            buildable_area_way, allowable_power_way = calculate_way_area(way, min_allowable_power)
+            buildable_area_way, allowable_power_way, no_nodes = calculate_way_area(way, min_allowable_power)
             overall_buildeable_area = overall_buildeable_area + buildable_area_way
             overall_allowable_power = overall_allowable_power + allowable_power_way
 
-            number_nodes = number_nodes + len(way["buildable_nodes"])
+            number_nodes = number_nodes + no_nodes
     else:
         pass
 
@@ -123,7 +123,7 @@ def calculate_way_area(way: dict, min_allowable_power: int):
             hull = ConvexHull(points)
         except qhull.QhullError:
             log.error("Input is less than 2dimensional")
-            return 0,0
+            return 0,0,0
         hull_indices = np.unique(hull.simplices.flat)
         shape_vertices = points[hull_indices, :]
 
@@ -139,11 +139,11 @@ def calculate_way_area(way: dict, min_allowable_power: int):
 
         allowable_power = buildable_area * avg_power_coefficient
         if allowable_power >= min_allowable_power:
-            return buildable_area, allowable_power
+            return buildable_area, allowable_power, len(way["buildable_nodes"])
         else:
-            return 0,0
+            return 0,0,0
     else:
-        return 0,0
+        return 0,0,0
 
 def update_collection(db, region_id: int, overall_buildeable_area: float,
                       overall_allowable_power: float, node_number: int, distance: float, min_allowable_power: int):
