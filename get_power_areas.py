@@ -3,7 +3,7 @@ from pymongo.errors import OperationFailure
 import logging as log
 import time
 import ssl
-from scipy.spatial import ConvexHull
+from scipy.spatial import ConvexHull, qhull
 from pyproj import Geod
 import numpy as np
 
@@ -119,7 +119,11 @@ def calculate_way_area(way: dict, min_allowable_power: int):
     if len(way["buildable_nodes"]) > 2:
         points = np.array(way["node_coordinates"])
         #find vertices of shape
-        hull = ConvexHull(points)
+        try:
+            hull = ConvexHull(points)
+        except qhull.QhullError:
+            log.error("Input is less than 2dimensional")
+            return 0,0
         hull_indices = np.unique(hull.simplices.flat)
         shape_vertices = points[hull_indices, :]
 
@@ -157,5 +161,4 @@ def update_collection(db, region_id: int, overall_buildeable_area: float,
 if __name__ == "__main__":
 
     for i in range(1,381):
-        get_buildable_nodes(i, 30)
-        
+        get_buildable_nodes(135, 30)
