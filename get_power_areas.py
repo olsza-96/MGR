@@ -10,7 +10,11 @@ import numpy as np
 log.getLogger().setLevel(log.INFO)
 log.basicConfig(format="%(asctime)s - [%(levelname)s]: %(message)s", datefmt="%H:%M:%S")
 
-def get_buildable_nodes(region_id: int):
+def get_buildable_nodes(region_id: int, min_allowable_power: int):
+    """
+    :param region_id:
+    :param min_allowable_power: minimal power limit for one area, MW
+    """
     start = time.time()
     log.info(f"Connecting to the database")
 
@@ -58,11 +62,11 @@ def get_buildable_nodes(region_id: int):
     allowable_nodes = list(cur)
 
     if len(allowable_nodes) != 0:
-        process_nodes_for_distance(region_id, 0.5,allowable_nodes, db)
-        process_nodes_for_distance(region_id, 0.75,allowable_nodes, db)
-        process_nodes_for_distance(region_id, 1.,allowable_nodes, db)
-        process_nodes_for_distance(region_id, 1.25,allowable_nodes, db)
-        process_nodes_for_distance(region_id, 1.5,allowable_nodes, db)
+        process_nodes_for_distance(region_id, 0.5,allowable_nodes, db, min_allowable_power)
+        process_nodes_for_distance(region_id, 0.75,allowable_nodes, db, min_allowable_power)
+        process_nodes_for_distance(region_id, 1.,allowable_nodes, db, min_allowable_power)
+        process_nodes_for_distance(region_id, 1.25,allowable_nodes, db, min_allowable_power)
+        process_nodes_for_distance(region_id, 1.5,allowable_nodes, db, min_allowable_power)
 
         time.sleep(1)
         end = time.time()
@@ -72,10 +76,10 @@ def get_buildable_nodes(region_id: int):
         log.info(f"No buildable ways for region {region_id}")
         pass
 
-def process_nodes_for_distance(region_id: int, min_distance: float, allowable_nodes: list, db):
+def process_nodes_for_distance(region_id: int, min_distance: float, allowable_nodes: list, db, min_allowable_power: int):
     filtered_ways = filter_data_distance(allowable_nodes, min_distance)
-    overall_buildeable_area, overall_allowable_power, node_number = iterate_allowable_ways(filtered_ways)
-    update_collection(db, region_id, overall_buildeable_area, overall_allowable_power, node_number, min_distance)
+    overall_buildeable_area, overall_allowable_power, node_number = iterate_allowable_ways(filtered_ways, min_allowable_power)
+    update_collection(db, region_id, overall_buildeable_area, overall_allowable_power, node_number, min_distance, min_allowable_power)
 
 def filter_data_distance(data: list, min_distance: float):
     filtered_data = []
@@ -93,13 +97,13 @@ def filter_data_distance(data: list, min_distance: float):
     else:
         return 0
 
-def iterate_allowable_ways(allowable_nodes: list):
+def iterate_allowable_ways(allowable_nodes: list, min_allowable_power: int):
 
     overall_buildeable_area, overall_allowable_power, number_nodes = 0, 0, 0
     if type(allowable_nodes)!= int:
         for way in allowable_nodes:
             log.info(f"Calculating for way: {way['_id']}")
-            buildable_area_way, allowable_power_way = calculate_way_area(way)
+            buildable_area_way, allowable_power_way = calculate_way_area(way, min_allowable_power)
             overall_buildeable_area = overall_buildeable_area + buildable_area_way
             overall_allowable_power = overall_allowable_power + allowable_power_way
 
@@ -109,7 +113,7 @@ def iterate_allowable_ways(allowable_nodes: list):
 
     return overall_buildeable_area, overall_allowable_power, number_nodes
 
-def calculate_way_area(way: dict):
+def calculate_way_area(way: dict, min_allowable_power: int):
     # specify a named ellipsoid
     geod = Geod(ellps="WGS84")
     if len(way["buildable_nodes"]) > 2:
@@ -130,18 +134,20 @@ def calculate_way_area(way: dict):
         avg_power_coefficient = 19.8 # MW/ km2 power density coefficient
 
         allowable_power = buildable_area * avg_power_coefficient
-
-        return buildable_area, allowable_power
+        if allowable_power >= min_allowable_power:
+            return buildable_area, allowable_power
+        else:
+            return 0,0
     else:
         return 0,0
 
 def update_collection(db, region_id: int, overall_buildeable_area: float,
-                      overall_allowable_power: float, node_number: int, distance: float):
+                      overall_allowable_power: float, node_number: int, distance: float, min_allowable_power: int):
     distance = int(distance*1e3)
     current_collection = db["regions"]
-    current_collection.update_one({"id": region_id}, {"$set": {f"results_{distance}m": {"overall_area":overall_buildeable_area,
-                                                                                 "overall_power": overall_allowable_power,
-                                                                                 "node_number": node_number}}}
+    current_collection.update_one({"id": region_id}, {"$set": {f"results_{distance}m_min{min_allowable_power}MW": {"overall_area":overall_buildeable_area,
+                                                                                        "overall_power": overall_allowable_power,
+                                                                                        "node_number": node_number}}}
                                   , upsert= False)
 
     log.info(f"Data of buildable areas and power inserted to region {region_id}")
@@ -151,4 +157,5 @@ def update_collection(db, region_id: int, overall_buildeable_area: float,
 if __name__ == "__main__":
 
     for i in range(1,381):
-        get_buildable_nodes(i)
+        get_buildable_nodes(i, 30)
+        
