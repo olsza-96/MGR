@@ -26,12 +26,11 @@ def get_buildable_nodes(region_id: int):
     current_collection = db["testing_col"]
     #delete some field from document
     #db["regions"].update_one({}, {"$unset": {"results_500": 1}})
-    #db.example.updateMany({},{"$unset":{"tags.words":1}})
 
     query = [
         {
             '$match': {
-                'region_id': 1,
+                'region_id': region_id,
                 'landuse': {
                     '$in': [
                         'farmland', 'meadow', 'brownfield', 'orchard', 'grass'
@@ -56,15 +55,14 @@ def get_buildable_nodes(region_id: int):
     ]
 
     cur = current_collection.aggregate(pipeline=query)
+    allowable_nodes = list(cur)
 
-    if cur != None:
-        allowable_nodes = list(cur)
-
-        process_nodes_for_distance(i, 0.5,allowable_nodes, db)
-        process_nodes_for_distance(i, 0.75,allowable_nodes, db)
-        process_nodes_for_distance(i, 1.,allowable_nodes, db)
-        process_nodes_for_distance(i, 1.25,allowable_nodes, db)
-        process_nodes_for_distance(i, 1.5,allowable_nodes, db)
+    if len(allowable_nodes) != 0:
+        process_nodes_for_distance(region_id, 0.5,allowable_nodes, db)
+        process_nodes_for_distance(region_id, 0.75,allowable_nodes, db)
+        process_nodes_for_distance(region_id, 1.,allowable_nodes, db)
+        process_nodes_for_distance(region_id, 1.25,allowable_nodes, db)
+        process_nodes_for_distance(region_id, 1.5,allowable_nodes, db)
 
         time.sleep(1)
         end = time.time()
@@ -75,7 +73,7 @@ def get_buildable_nodes(region_id: int):
         pass
 
 def process_nodes_for_distance(region_id: int, min_distance: float, allowable_nodes: list, db):
-    filtered_ways = filter_data_distance(allowable_nodes, 2.5)
+    filtered_ways = filter_data_distance(allowable_nodes, min_distance)
     overall_buildeable_area, overall_allowable_power, node_number = iterate_allowable_ways(filtered_ways)
     update_collection(db, region_id, overall_buildeable_area, overall_allowable_power, node_number, min_distance)
 
@@ -98,13 +96,16 @@ def filter_data_distance(data: list, min_distance: float):
 def iterate_allowable_ways(allowable_nodes: list):
 
     overall_buildeable_area, overall_allowable_power, number_nodes = 0, 0, 0
-    for way in allowable_nodes:
-        log.info(f"Calculating for way: {way['_id']}")
-        buildable_area_way, allowable_power_way = calculate_way_area(way)
-        overall_buildeable_area = overall_buildeable_area + buildable_area_way
-        overall_allowable_power = overall_allowable_power + allowable_power_way
+    if type(allowable_nodes)!= int:
+        for way in allowable_nodes:
+            log.info(f"Calculating for way: {way['_id']}")
+            buildable_area_way, allowable_power_way = calculate_way_area(way)
+            overall_buildeable_area = overall_buildeable_area + buildable_area_way
+            overall_allowable_power = overall_allowable_power + allowable_power_way
 
-        number_nodes = number_nodes + len(way["buildable_nodes"])
+            number_nodes = number_nodes + len(way["buildable_nodes"])
+    else:
+        pass
 
     return overall_buildeable_area, overall_allowable_power, number_nodes
 

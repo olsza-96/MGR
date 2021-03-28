@@ -165,7 +165,7 @@ def get_nodes_from_way(host: str, port: int):
 
     db = connection.Poland_spatial_data
     attributes = {"nodes": 1, "landuse": 1, "id":1, "_id": 0}
-    for i in range(1, 381):
+    for i in range(38, 381):
         start = time.time()
         log.info(f"Getting nodes for region {i}")
         update_nodes_with_landuse(i, attributes, db)
@@ -182,7 +182,15 @@ def update_nodes_with_landuse(region_id: int,  attributes: dict, db) -> None:
     if len(data) != 0:
         for element in data:
             log.info(f"Way_id: {element['id']}")
-            db["testing_col"].update_many({"id": {"$in": element["nodes"]}},
+
+            cur = db["testing_col"].find_one({"way_id": element["id"]})
+
+            if cur != None:
+                log.info("Already in db"
+                         )
+                continue
+            else:
+                db["testing_col"].update_many({"id": {"$in": element["nodes"]}},
                                      {"$set": {"landuse": element["landuse"],
                                                "way_id": element["id"]}},
                                      upsert=False

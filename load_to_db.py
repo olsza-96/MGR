@@ -65,5 +65,42 @@ def get_file_data(folder_path: p.Path, file_list: list):
     end = time.time()
     log.info(f"Process of reading data took {end - start} seconds")
     return all_nodal_data
+
+def update_collection(host: str, port: int, file:list, collection: str):
+    start = time.time()
+    log.info(f"Connecting to the database")
+    connection = MongoClient(host, port)
+    try:
+        connection.server_info()
+        log.info(f"Connected successfully")
+    except OperationFailure:
+        log.error(f"Could not connect to db")
+
+    with connection:
+        log.info(f"Inserting data to {collection} collection")
+        db = connection.Poland_spatial_data
+        current_collection = db[collection]
+        #current_collection.delete_many({})
+        for element in file:
+            log.info(f"Way_id: {element['id']}")
+            current_collection.update({"id": element["id"]},
+                                          {"$set": {"landuse": element["landuse"],
+                                                    "way_id": element["way_id"]}},
+                                          upsert=False
+                                          )
+
+        log.info(f"Data updated successfully")
+        time.sleep(1)
+        end = time.time()
+        log.info(f"Process of inserting data took {end - start} seconds")
+
+def read_json(f_name: str):
+    with open(f_name) as json_read:
+        data = json.load(json_read)
+
+    return data
+
 if __name__ == "__main__":
-    get_files("region_data")
+    #get_files("region_data")
+    data_update = read_json("C:/Users/Mongo/PycharmProjects/MGR_scripts/MGR/files_to_insert/filtered_output_200_250.json")
+    update_collection("localhost", 27017, data_update, "testing_col")

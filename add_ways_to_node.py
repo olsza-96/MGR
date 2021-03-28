@@ -50,4 +50,4 @@ def update_nodes_with_landuse(region_id: int,  attributes: dict, db) -> None:
                                               )
 
 if __name__ == "__main__":
-    get_nodes_from_way(start=365, stop=381)
+    get_nodes_from_way(start=1, stop=2)
